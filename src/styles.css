@@ -1,0 +1,21 @@
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+.app-column {
+  margin-inline: auto;
+}
+
+.app-tabbar {
+  inset-inline: 0;
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.page-content {
+  padding: 24px 16px;
+}
