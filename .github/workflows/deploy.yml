@@ -1,0 +1,38 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: max-hackathon-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Build and deploy
+        shell: bash
+        env:
+          OPENAPI_URL: ${{ vars.OPENAPI_URL }}
+          FRONTEND_BIND_PORT: ${{ vars.FRONTEND_BIND_PORT }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          APP_IMAGE: max-hackathon-frontend:${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          compose=(docker compose --env-file /dev/null -p max-hackathon-frontend -f compose.yml)
+
+          "${compose[@]}" config --quiet
+          "${compose[@]}" build --pull --no-cache frontend
+          "${compose[@]}" up -d --no-build --wait --wait-timeout 120 frontend
+          "${compose[@]}" ps

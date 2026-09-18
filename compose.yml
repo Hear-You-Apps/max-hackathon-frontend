@@ -1,0 +1,25 @@
+name: max-hackathon-frontend
+
+services:
+  frontend:
+    image: ${APP_IMAGE:-max-hackathon-frontend:local}
+    build:
+      context: .
+      target: production
+      args:
+        OPENAPI_URL: ${OPENAPI_URL:?OPENAPI_URL is required}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${FRONTEND_BIND_PORT:-3004}:80'
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1/index.html]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
