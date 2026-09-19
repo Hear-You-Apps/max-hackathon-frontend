@@ -9,12 +9,12 @@ import {
 import { Navigation } from './Navigation';
 
 export function App() {
-  const { platform, colorScheme } = useAppearance();
+  const { platform } = useAppearance();
 
   return (
     <ConfigProvider
       platform={platform}
-      colorScheme={colorScheme}
+      colorScheme={'light'}
       locale="ru"
       isWebView={Boolean(window.WebApp?.initData)}
     >
