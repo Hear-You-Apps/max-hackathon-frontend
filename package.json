@@ -7,6 +7,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "prepare": "husky",
     "predev": "npm run api:generate",
     "dev": "vite --host 127.0.0.1",
     "prebuild": "npm run api:generate",
@@ -39,6 +40,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.0",
     "globals": "^17.0.0",
+    "husky": "^9.1.7",
     "prettier": "^3.0.0",
     "swagger-typescript-api": "13.12.6",
     "typescript": "~5.9.3",

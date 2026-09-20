@@ -2,7 +2,7 @@ FROM node:24-bookworm-slim AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN HUSKY=0 npm ci
 COPY . .
 
 ARG OPENAPI_URL

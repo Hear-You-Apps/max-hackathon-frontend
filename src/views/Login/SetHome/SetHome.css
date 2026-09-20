@@ -1,146 +1,146 @@
 .set-home {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .set-home > .home-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 12px 16px;
-    gap: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 12px;
 
-    background: rgba(255, 255, 255, 1);
-    border-radius: 16px;
+  background: rgba(255, 255, 255, 1);
+  border-radius: 16px;
 }
 
 .home-container > .home-icon {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 
-    background: rgba(0, 122, 255, 0.12);
-    border-radius: 16px;
+  background: rgba(0, 122, 255, 0.12);
+  border-radius: 16px;
 }
 
 .home-info > :nth-child(1) {
-    font-weight: 600;
-    font-size: 17px;
-    line-height: 24px;
-    color: rgba(6, 7, 8, 1);
-    margin-bottom: 2px;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 24px;
+  color: rgba(6, 7, 8, 1);
+  margin-bottom: 2px;
 }
 
 .home-info > :nth-child(2) {
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 16px;
-    color: rgba(6, 7, 8, 0.68)
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(6, 7, 8, 0.68);
 }
 
 .home-settings {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
 
-    background: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 1);
 }
 
 .role-select {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
 
-    & > :nth-child(1) {
-        font-weight: 400;
-        font-size: 13px;
-        line-height: 16px;
-        color: rgba(6, 7, 8, 0.52)
-    }
+  & > :nth-child(1) {
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 16px;
+    color: rgba(6, 7, 8, 0.52);
+  }
 }
 
 .selector {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 .selector-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    height: 32px;
+  height: 32px;
 
-    border-radius: 999px;
-    padding: 6px 12px;
+  border-radius: 999px;
+  padding: 6px 12px;
 
-    background: rgba(9, 9, 9, 0.05);
+  background: rgba(9, 9, 9, 0.05);
 
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
-    color: rgba(6, 7, 8, 1);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(6, 7, 8, 1);
 
-    transition: all .3s ease;
+  transition: all 0.3s ease;
 }
 
 .selector-item.selected {
-    background: rgba(0, 122, 255, 0.12);
-    color: rgba(0, 122, 255, 1)
+  background: rgba(0, 122, 255, 0.12);
+  color: rgba(0, 122, 255, 1);
 }
 
 .selector-text {
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 16px;
-    color: rgba(6, 7, 8, 0.52)
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(6, 7, 8, 0.52);
 }
 
 .settings-notifications {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 
-    padding: 12px 16px;
+  padding: 12px 16px;
 
-    background: rgba(255, 255, 255, 1);
-    border-radius: 16px;
+  background: rgba(255, 255, 255, 1);
+  border-radius: 16px;
 }
 
 .notifications-text {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 
-    & > :nth-child(1) {
-        font-weight: 500;
-        font-size: 16px;
-        line-height: 20px;
-        color: rgba(6, 7, 8, 1);
-    }
+  & > :nth-child(1) {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 20px;
+    color: rgba(6, 7, 8, 1);
+  }
 
-    & > :nth-child(2) {
-        font-weight: 400;
-        font-size: 13px;
-        line-height: 16px;
-        color: rgba(6, 7, 8, 0.68)
-    }
-}
-
-.settings-tip {
+  & > :nth-child(2) {
     font-weight: 400;
     font-size: 13px;
     line-height: 16px;
-    color: rgba(6, 7, 8, 0.52)
+    color: rgba(6, 7, 8, 0.68);
+  }
+}
+
+.settings-tip {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: rgba(6, 7, 8, 0.52);
 }

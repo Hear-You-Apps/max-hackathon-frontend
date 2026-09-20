@@ -6,7 +6,6 @@
   font-family: 'Roboto', sans-serif !important;
 
   box-sizing: border-box !important;
-
 }
 
 body {
@@ -57,19 +56,19 @@ body,
 }
 
 .icon-meets.active > * {
-    fill: rgba(0, 122, 255, 1)
+  fill: rgba(0, 122, 255, 1);
 }
 
 .icon-requests.active > * {
-    fill: rgba(0, 122, 255, 1)
+  fill: rgba(0, 122, 255, 1);
 }
 
 .icon-chats.active > * {
-  fill: rgba(0, 122, 255, 1)
+  fill: rgba(0, 122, 255, 1);
 }
 
 .icon-manage.active > * {
-  fill: rgba(0, 122, 255, 1)
+  fill: rgba(0, 122, 255, 1);
 }
 
 .vkuiTabbarItem__host {
@@ -87,6 +86,8 @@ body,
   height: 70px;
 }
 
-#root, .page-content, .vkuiPanel__in {
+#root,
+.page-content,
+.vkuiPanel__in {
   background-color: rgba(237, 238, 242, 1) !important;
 }
