@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { Epic, Tabbar, TabbarItem, View } from '@vkontakte/vkui';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useMaxBackButton } from './bridge/useMaxBackButton';
 import { paths, routes } from './navigation/routes';
 import { Meets } from './views/Meets/Meets';
 import { HomeDetails } from './views/Meets/Details';
@@ -19,14 +18,11 @@ export function Navigation() {
   const navigate = useNavigate();
   const route = routes.find(({ path }) => path === location.pathname);
   const main = userInfo.home ? paths.meets : paths.login;
-  const details = Boolean(route && route.path !== main);
   //const from = (location.state as { from?: string } | null)?.from;
 
   const goBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
-
-  useMaxBackButton(details, goBack);
 
   if (!route) return <Navigate to={main} replace />;
 
