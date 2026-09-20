@@ -75,9 +75,6 @@
     }
 
     & > :nth-child(1) {
-        background: rgba(0, 122, 255, 1);
-        color: #fff;
-
         & > :nth-child(1) {
             width: 24px;
             height: 24px;
@@ -86,14 +83,6 @@
         & > :nth-child(1) > * > * {
             fill: #fff
         }
-    }
-
-    & > :nth-child(2) {
-        background: rgba(233, 235, 241, 1);
-    }
-
-    & > :nth-child(3) {
-        color: rgba(0, 122, 255, 1)
     }
 }
 

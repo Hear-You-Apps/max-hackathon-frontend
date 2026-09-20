@@ -1,5 +1,7 @@
 export const paths = {
   login: '/login',
+  findHome: '/findHome',
+  setHome: '/setHome',
   meets: '/meets',
   meet: '/meets/meet',
   newMeet: '/meets/new',
@@ -13,6 +15,8 @@ export const paths = {
 
 export const routes = [
   { path: paths.login, view: 'login', panel: 'login-main', main: paths.login },
+  { path: paths.findHome, view: 'login', panel: 'login-find', main: paths.findHome },
+  { path: paths.setHome, view: 'login', panel: 'set-home', main: paths.setHome },
   { path: paths.meets, view: 'meets', panel: 'meets-main', main: paths.meets },
   { path: paths.meet, view: 'meets', panel: 'meets-meet', main: paths.meets },
   { path: paths.newMeet, view: 'meets', panel: 'meets-new', main: paths.meets },

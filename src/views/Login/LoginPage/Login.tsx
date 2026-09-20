@@ -3,8 +3,13 @@ import { Panel } from '@vkontakte/vkui';
 
 import './Login.css';
 import { IconChevronRight, IconPoll, IconQR } from 'src/assets/icons';
+import { useNavigate } from 'react-router-dom';
+import { paths } from 'src/navigation/routes.ts';
+import { Button } from 'src/components';
 
 export function Login({ id }: { id: string }) {
+  const navigate = useNavigate();
+
   return (
     <Panel id={id}>
       <MaxPanel className="page-content login">
@@ -20,12 +25,17 @@ export function Login({ id }: { id: string }) {
         </div>
 
         <div className="login-buttons">
-          <button>
+          <Button>
             {' '}
             <IconQR /> Сканировать QR-код
-          </button>
-          <button>Ввести код дома</button>
-          <button>Войти через Госуслуги</button>
+          </Button>
+          <Button
+            mode={'secondary'}
+            onClick={() => navigate(paths.findHome, { state: { from: paths.login } })}
+          >
+            Ввести код дома
+          </Button>
+          <Button mode={'outline'}>Войти через Госуслуги</Button>
         </div>
 
         <div className="login-additional">

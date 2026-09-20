@@ -5,3 +5,5 @@ export { default as Icon24Manage } from './manage.svg?react';
 export { default as IconQR } from './qr.svg?react';
 export { default as IconPoll } from './poll.svg?react';
 export { default as IconChevronRight } from './chevron_right.svg?react';
+export { default as IconArrowLeftOutline } from './arrow_left_outline.svg?react';
+export { default as IconHomeOutline } from './home_outline.svg?react';

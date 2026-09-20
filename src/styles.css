@@ -5,7 +5,12 @@
 *::after {
   font-family: 'Roboto', sans-serif !important;
 
-  box-sizing: border-box !important
+  box-sizing: border-box !important;
+
+}
+
+body {
+  overflow-x: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -42,7 +47,7 @@ body,
 }
 
 .page-content {
-  padding: 24px 16px;
+  padding: 12px;
 }
 
 .vkuiTabbarItem {
@@ -82,6 +87,6 @@ body,
   height: 70px;
 }
 
-#root, .page-content {
+#root, .page-content, .vkuiPanel__in {
   background-color: rgba(237, 238, 242, 1) !important;
 }

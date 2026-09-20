@@ -10,7 +10,7 @@ import { ProfileDetails } from './views/Requests/Details';
 
 import { Icon24Meets, Icon24Chats, Icon24Requests, Icon24Manage } from './assets/icons';
 import { useUserStore } from 'src/storage';
-import { Login } from 'src/views/Login';
+import { FindHome, Login, SetHome } from 'src/views/Login';
 
 export function Navigation() {
   const userInfo = useUserStore((state) => state.user);
@@ -20,28 +20,25 @@ export function Navigation() {
   const route = routes.find(({ path }) => path === location.pathname);
   const main = userInfo.home ? paths.meets : paths.login;
   const details = Boolean(route && route.path !== main);
-  const from = (location.state as { from?: string } | null)?.from;
+  //const from = (location.state as { from?: string } | null)?.from;
 
   const goBack = useCallback(() => {
-    if (from === main) {
-      navigate(-1);
-    } else {
-      navigate(main, { replace: true });
-    }
-  }, [from, main, navigate]);
+    navigate(-1);
+  }, [navigate]);
 
   useMaxBackButton(details, goBack);
 
-  if (!route) return <Navigate to={paths.meets} replace />;
+  if (!route) return <Navigate to={main} replace />;
 
   const meetsPanel = route.view === 'meets' ? route.panel : 'meets-main';
   const requestsPanel = route.view === 'requests' ? route.panel : 'requests-user';
+  const loginPanel = route.view === 'login' ? route.panel : 'login-main';
 
   return (
     <Epic
-      activeStory={userInfo.home ? route.view : 'login'}
+      activeStory={userInfo.status === 'logged' ? route.view : 'login'}
       tabbar={
-        userInfo.home ? (
+        userInfo.status === 'logged' ? (
           <Tabbar className="app-tabbar" aria-label="Вкладки">
             {userInfo.admin ? (
               <TabbarItem
@@ -81,8 +78,21 @@ export function Navigation() {
         ) : null
       }
     >
-      <View id={'login'} activePanel={'login-main'}>
+      <View
+        id={'login'}
+        activePanel={loginPanel}
+        onSwipeBack={goBack}
+        history={
+          loginPanel === 'login-main'
+            ? ['login-main']
+            : loginPanel === 'login-find'
+              ? ['login-main', 'login-find']
+              : ['login-main', 'login-find', 'set-home']
+        }
+      >
         <Login id={'login-main'} />
+        <FindHome id={'login-find'} onBack={goBack} />
+        <SetHome id={'set-home'} onBack={goBack} />
       </View>
 
       <View
