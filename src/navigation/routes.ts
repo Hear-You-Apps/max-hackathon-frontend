@@ -1,4 +1,5 @@
 export const paths = {
+  login: '/login',
   meets: '/meets',
   meet: '/meets/meet',
   newMeet: '/meets/new',
@@ -11,13 +12,14 @@ export const paths = {
 } as const;
 
 export const routes = [
+  { path: paths.login, view: 'login', panel: 'login-main', main: paths.login },
   { path: paths.meets, view: 'meets', panel: 'meets-main', main: paths.meets },
   { path: paths.meet, view: 'meets', panel: 'meets-meet', main: paths.meets },
   { path: paths.newMeet, view: 'meets', panel: 'meets-new', main: paths.meets },
   { path: paths.requests, view: 'requests', panel: 'requests-main', main: paths.requests },
   { path: paths.request, view: 'requests', panel: 'request', main: paths.requests },
   { path: paths.newRequest, view: 'requests', panel: 'requests-new', main: paths.requests },
-  { path: paths.chats, view: 'chats', panel: 'chats-main', main: paths.chats },
+  { path: paths.chats, view: 'chats', panel: 'chats-user', main: paths.chats },
   { path: paths.homeInfo, view: 'home', panel: 'home-info', main: paths.homeInfo },
   { path: paths.manage, view: 'manage', panel: 'manage-main', main: paths.manage },
 ] as const;

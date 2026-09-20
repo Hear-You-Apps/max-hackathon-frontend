@@ -81,3 +81,7 @@ body,
 .app-tabbar {
   height: 70px;
 }
+
+#root, .page-content {
+  background-color: rgba(237, 238, 242, 1) !important;
+}

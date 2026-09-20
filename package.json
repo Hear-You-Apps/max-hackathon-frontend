@@ -25,7 +25,8 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-router-dom": "^7.18.4",
-    "vite-plugin-svgr": "^5.2.0"
+    "vite-plugin-svgr": "^5.2.0",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

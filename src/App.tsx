@@ -1,4 +1,3 @@
-import { useAppearance } from '@maxhub/max-ui';
 import {
   AdaptivityProvider,
   AppRoot,
@@ -9,11 +8,9 @@ import {
 import { Navigation } from './Navigation';
 
 export function App() {
-  const { platform } = useAppearance();
-
   return (
     <ConfigProvider
-      platform={platform}
+      platform={'ios'}
       colorScheme={'light'}
       locale="ru"
       isWebView={Boolean(window.WebApp?.initData)}
