@@ -1,0 +1,18 @@
+.header {
+
+}
+
+.vkuiPanelHeader__contentIn {
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 24px;
+    color: rgba(6, 7, 8, 1)
+}
+
+.back-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    width: 40px;
+}
