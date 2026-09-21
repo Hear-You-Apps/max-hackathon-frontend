@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Epic, Tabbar, TabbarItem, View } from '@vkontakte/vkui';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { paths, routes } from './navigation/routes';
@@ -23,6 +23,11 @@ export function Navigation() {
   const goBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
+
+  useEffect(() => {
+    // @TODO: DELETE 30 SEPTEMBER
+    console.log(window.WebApp?.initData);
+  }, []);
 
   if (!route) return <Navigate to={main} replace />;
 
