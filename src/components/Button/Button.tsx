@@ -12,7 +12,7 @@ export function Button({
   children: React.ReactNode | string;
   onClick?: () => void;
   disabled?: boolean;
-  mode?: 'primary' | 'secondary' | 'outline';
+  mode?: 'primary' | 'secondary' | 'outline' | 'themed';
 }) {
   return (
     <button

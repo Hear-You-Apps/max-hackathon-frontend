@@ -1,30 +1,13 @@
-.header {
-}
-
-.vkuiPanelHeader__contentIn {
-  font-weight: 600;
-  font-size: 17px;
-  line-height: 24px;
-  color: rgba(6, 7, 8, 1);
-}
-
-.back-button {
+.meets {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  height: 40px;
-  width: 40px;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 60px !important;
 }
 
-.header-after {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  width: 40px;
-}
-
-.home-header {
+.meets-header {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,4 +26,9 @@
     line-height: 16px;
     color: rgba(6, 7, 8, 0.52);
   }
+}
+
+.mode-selector {
+  width: 100%;
+  height: 36px !important;
 }

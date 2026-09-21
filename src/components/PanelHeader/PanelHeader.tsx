@@ -1,8 +1,19 @@
 import './PanelHeader.css';
 import { PanelHeader } from '@vkontakte/vkui';
 import { IconArrowLeftOutline } from 'src/assets/icons';
+import * as React from 'react';
 
-export function Header({ title, back }: { title: string; back?: () => void }) {
+export function Header({
+  back,
+  children,
+  after,
+  isHome = false,
+}: {
+  back?: () => void;
+  children?: React.ReactNode;
+  after?: React.ReactNode;
+  isHome?: boolean;
+}) {
   return (
     <PanelHeader
       className={'header'}
@@ -13,8 +24,16 @@ export function Header({ title, back }: { title: string; back?: () => void }) {
           </div>
         ) : null
       }
+      after={after ? <div className={'header-after'}>{after}</div> : null}
     >
-      {title}
+      {isHome ? (
+        <div className={'home-header'}>
+          <div>ул. Ленина, 24</div>
+          <div>412 квартир · 286 в приложении</div>
+        </div>
+      ) : (
+        children
+      )}
     </PanelHeader>
   );
 }

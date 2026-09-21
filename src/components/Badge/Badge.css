@@ -1,0 +1,33 @@
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+
+  padding: 2px 8px;
+
+  border-radius: 999px;
+}
+
+.badge.primary {
+  background: rgba(0, 122, 255, 0.12);
+  color: rgba(0, 122, 255, 1);
+}
+
+.badge.neutral {
+  background: rgba(9, 9, 9, 0.06);
+  color: rgba(6, 7, 8, 0.68);
+}
+
+.badge.positive {
+  background: rgba(26, 190, 67, 0.12);
+  color: rgba(26, 190, 67, 1);
+}
+
+.badge.yellow {
+  background: rgba(255, 159, 10, 0.14);
+  color: rgba(255, 159, 10, 1);
+}

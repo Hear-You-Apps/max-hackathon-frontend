@@ -33,7 +33,7 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
 
   return (
     <Panel id={id}>
-      <Header title={'Код дома'} back={onBack} />
+      <Header back={onBack}>Код дома</Header>
       <MaxPanel className="page-content find-home">
         <div className="tip">
           Введите код с доски объявлений или из сообщения администратора. Код выглядит как три части

@@ -34,6 +34,10 @@
   background: rgba(0, 122, 255, 1);
 }
 
+.progress-bar.gray {
+  background: rgba(6, 7, 8, 0.48);
+}
+
 .choice-marker {
   width: 2px;
   height: 14px;

@@ -21,11 +21,6 @@
   align-items: center;
 }
 
-.card-bottom {
-  justify-content: start;
-  gap: 8px;
-}
-
 .card-title {
   width: 100%;
   font-weight: 600;

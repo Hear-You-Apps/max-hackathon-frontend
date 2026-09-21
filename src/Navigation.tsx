@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Epic, Tabbar, TabbarItem, View } from '@vkontakte/vkui';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { paths, routes } from './navigation/routes';
-import { Meets } from './views/Meets/Meets';
+import { Meets } from 'src/views/Meets';
 import { HomeDetails } from './views/Meets/Details';
 import { Requests } from './views/Requests/Requests';
 import { ProfileDetails } from './views/Requests/Details';

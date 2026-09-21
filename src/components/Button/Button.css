@@ -40,3 +40,11 @@
   color: rgba(0, 122, 255, 1);
   background: transparent;
 }
+
+.themed {
+  color: rgba(0, 122, 255, 1);
+  background: rgba(0, 122, 255, 0.12);
+
+  border-radius: 12px;
+  height: 40px;
+}

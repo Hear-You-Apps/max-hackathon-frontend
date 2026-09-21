@@ -33,7 +33,7 @@ export function SetHome({ id, onBack }: { id: string; onBack?: () => void }) {
 
   return (
     <Panel id={id}>
-      <Header title={'Ваш дом'} back={onBack} />
+      <Header back={onBack}>Ваш дом</Header>
       <MaxPanel className="page-content set-home">
         <div className={'home-container'}>
           <div className={'home-icon'}>
