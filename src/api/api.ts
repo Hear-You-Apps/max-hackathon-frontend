@@ -10,6 +10,41 @@
  * ---------------------------------------------------------------
  */
 
+export type HouseJoinRequestStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled";
+
+/** Права просмотра. При отозванном доступе список пуст. */
+export type HousePermission = "houses.read" | "meetings.read" | "requests.read";
+
+export type ApartmentVerificationStatus = "pending" | "verified" | "rejected";
+
+export type ApartmentRelationship = "owner" | "tenant";
+
+export type HouseRole =
+  | "resident"
+  | "organizer"
+  | "house_council"
+  | "house_admin";
+
+export type HouseMembershipStatus = "approved" | "revoked" | "left";
+
+export type ErrorCode =
+  | "USER_NOT_INITIALIZED"
+  | "USER_NOT_FOUND"
+  | "INVITATION_NOT_FOUND"
+  | "INVITATION_EXPIRED"
+  | "INVITATION_REVOKED"
+  | "JOIN_REQUEST_ALREADY_EXISTS"
+  | "JOIN_REQUEST_NOT_FOUND"
+  | "JOIN_REQUEST_NOT_PENDING"
+  | "JOIN_REQUEST_OUTDATED"
+  | "APARTMENT_ALREADY_LINKED"
+  | "HOUSE_REJOIN_UNAVAILABLE"
+  | "HOUSE_MEMBERSHIP_NOT_FOUND";
+
 export interface HealthResponseDto {
   /** @example "ok" */
   status: "ok";
@@ -28,6 +63,8 @@ export interface ErrorResponseDto {
   message: string | string[];
   /** @example "Bad Request" */
   error: string;
+  /** @example "USER_NOT_INITIALIZED" */
+  code?: ErrorCode;
 }
 
 export interface EchoDto {
@@ -37,6 +74,229 @@ export interface EchoDto {
    * @example "Hello, Max!"
    */
   message: string;
+}
+
+export interface MyApartmentDto {
+  /** @example 105 */
+  id: number;
+  /** @example "112" */
+  number: string;
+  relationship: ApartmentRelationship;
+  verificationStatus: ApartmentVerificationStatus;
+}
+
+export interface HouseNotificationsDto {
+  /** @example true */
+  meetings: boolean;
+  /** @example true */
+  requests: boolean;
+}
+
+export interface MyHouseMembershipDto {
+  /** @example 1 */
+  id: number;
+  status: HouseMembershipStatus;
+  /** Причина отзыва доступа к дому */
+  revocationReason: string | null;
+  /** @example "Александр Кузнецов" */
+  displayName: string;
+  roles: HouseRole[];
+  apartments: MyApartmentDto[];
+  notifications: HouseNotificationsDto;
+}
+
+export interface MyHouseDto {
+  /** @example 10 */
+  id: number;
+  /** @example "ул. Ленина, 24" */
+  address: string;
+  /** @example "Жилсервис" */
+  managementCompanyName: string | null;
+  /** Ссылка для связи с администратором дома */
+  adminContactUrl: string | null;
+  /** @example 412 */
+  apartmentsCount: number | null;
+  /** @example 6 */
+  entrancesCount: number | null;
+  membership: MyHouseMembershipDto;
+  /** Права просмотра. При отозванном доступе список пуст. */
+  permissions: HousePermission[];
+}
+
+export interface HouseSummaryDto {
+  /** @example 10 */
+  id: number;
+  /** @example "ул. Ленина, 24" */
+  address: string;
+  /** @example "Жилсервис" */
+  managementCompanyName: string | null;
+  /** Ссылка для связи с администратором дома */
+  adminContactUrl: string | null;
+  /** @example 412 */
+  apartmentsCount: number | null;
+  /** @example 6 */
+  entrancesCount: number | null;
+}
+
+export interface MyHouseJoinRequestDto {
+  /** @example 25 */
+  id: number;
+  house: HouseSummaryDto;
+  /** @example "112" */
+  apartmentNumber: string;
+  /** @example "Александр Кузнецов" */
+  displayName: string;
+  relationship: ApartmentRelationship;
+  status: HouseJoinRequestStatus;
+  /** @example null */
+  rejectionReason: string | null;
+  notifications: HouseNotificationsDto;
+  permissions: HousePermission[];
+}
+
+export interface UserProfileDto {
+  /** @example 1 */
+  id: number;
+  /** @example "Иван" */
+  firstName: string;
+  /** @example "Иванов" */
+  lastName: string | null;
+  /** @example null */
+  username: string | null;
+  /** @example null */
+  photoUrl: string | null;
+}
+
+export interface InitResponseDto {
+  /** Дома с подтверждённым или отозванным доступом. Покинутые дома не возвращаются. */
+  houses: MyHouseDto[];
+  /** Последние заявки по каждой квартире, ожидающие подтверждения или отклонённые. Заявки до последнего выхода из дома не возвращаются. */
+  joinRequests: MyHouseJoinRequestDto[];
+  user: UserProfileDto;
+}
+
+export interface MyHousesResponseDto {
+  /** Дома с подтверждённым или отозванным доступом. Покинутые дома не возвращаются. */
+  houses: MyHouseDto[];
+  /** Последние заявки по каждой квартире, ожидающие подтверждения или отклонённые. Заявки до последнего выхода из дома не возвращаются. */
+  joinRequests: MyHouseJoinRequestDto[];
+}
+
+export interface FoundHouseDto {
+  /** @example 10 */
+  id: number;
+  /** @example "ул. Ленина, 24" */
+  address: string;
+  /** @example "Жилсервис" */
+  managementCompanyName: string | null;
+  /** Ссылка для связи с администратором дома */
+  adminContactUrl: string | null;
+  /** @example 412 */
+  apartmentsCount: number | null;
+  /** @example 6 */
+  entrancesCount: number | null;
+  /**
+   * Количество пользователей с подтверждённым доступом к дому
+   * @example 286
+   */
+  residentsCount: number;
+}
+
+export interface SearchHouseResponseDto {
+  house: FoundHouseDto;
+  /** Связь текущего пользователя с домом. При отсутствии связи или после выхода возвращается null. */
+  membership: MyHouseMembershipDto | null;
+  /** Последняя актуальная заявка текущего пользователя в этот дом либо null. Полный список доступен в /houses/me. */
+  joinRequest: MyHouseJoinRequestDto | null;
+}
+
+export interface JoinHouseNotificationsDto {
+  /** @example true */
+  meetings: boolean;
+  /** @example true */
+  requests: boolean;
+}
+
+export interface JoinHouseDto {
+  /**
+   * Код приглашения
+   * @maxLength 64
+   * @example "LEN-24-7Q"
+   */
+  code: string;
+  /**
+   * @maxLength 32
+   * @example "112"
+   */
+  apartmentNumber: string;
+  /**
+   * @maxLength 255
+   * @example "Александр Кузнецов"
+   */
+  displayName: string;
+  relationship: ApartmentRelationship;
+  notifications: JoinHouseNotificationsDto;
+}
+
+export interface LeaveHouseDto {
+  /**
+   * @min 1
+   * @max 4294967295
+   * @example 25
+   */
+  requestId: number;
+}
+
+export interface LeaveHouseMembershipDto {
+  /**
+   * @min 1
+   * @max 4294967295
+   * @example 1
+   */
+  houseId: number;
+}
+
+export interface UpdateHouseNotificationsDto {
+  notifications: JoinHouseNotificationsDto;
+  /**
+   * @min 1
+   * @max 4294967295
+   * @example 1
+   */
+  houseId: number;
+}
+
+export interface DeleteUserDto {
+  /**
+   * ID пользователя в нашей БД
+   * @min 1
+   * @max 4294967295
+   * @example 1
+   */
+  userId: number;
+}
+
+export interface ReviewJoinRequestDto {
+  /**
+   * @min 1
+   * @max 4294967295
+   * @example 25
+   */
+  requestId: number;
+}
+
+export interface RejectJoinRequestDto {
+  /**
+   * @min 1
+   * @max 4294967295
+   * @example 25
+   */
+  requestId: number;
+  /**
+   * @maxLength 2000
+   * @example "Неверно указан номер квартиры"
+   */
+  reason: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -310,7 +570,7 @@ export class Api<
      *
      * @tags Health
      * @name GetHealth
-     * @summary Check API and MySQL
+     * @summary Проверка доступности API и MySQL
      * @request GET:/api/health
      */
     getHealth: (params: RequestParams = {}) =>
@@ -326,16 +586,224 @@ export class Api<
      *
      * @tags Echo
      * @name Echo
-     * @summary Return a validated message
+     * @summary Проверка и возврат сообщения
      * @request POST:/api/echo
+     * @secure
      */
     echo: (data: EchoDto, params: RequestParams = {}) =>
       this.request<EchoDto, ErrorResponseDto>({
         path: `/api/echo`,
         method: "POST",
         body: data,
+        secure: true,
         type: "application/json",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Init
+     * @name Init
+     * @summary Инициализация текущего пользователя
+     * @request POST:/api/init
+     * @secure
+     */
+    init: (params: RequestParams = {}) =>
+      this.request<InitResponseDto, ErrorResponseDto>({
+        path: `/api/init`,
+        method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Houses
+     * @name GetMyHouses
+     * @summary Получение своих домов и заявок на присоединение
+     * @request GET:/api/houses/me
+     * @secure
+     */
+    getMyHouses: (params: RequestParams = {}) =>
+      this.request<MyHousesResponseDto, ErrorResponseDto>({
+        path: `/api/houses/me`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Houses
+     * @name SearchHouse
+     * @summary Поиск дома по коду приглашения
+     * @request GET:/api/houses/search
+     * @secure
+     */
+    searchHouse: (
+      query: {
+        /**
+         * Код приглашения
+         * @maxLength 64
+         * @example "LEN-24-7Q"
+         */
+        code: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SearchHouseResponseDto, ErrorResponseDto>({
+        path: `/api/houses/search`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Houses
+     * @name JoinHouse
+     * @summary Подача заявки на присоединение к дому
+     * @request POST:/api/houses/join
+     * @secure
+     */
+    joinHouse: (data: JoinHouseDto, params: RequestParams = {}) =>
+      this.request<MyHouseJoinRequestDto, ErrorResponseDto>({
+        path: `/api/houses/join`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Houses
+     * @name LeaveHouse
+     * @summary Отмена своей заявки на присоединение к дому
+     * @request DELETE:/api/houses/leave
+     * @secure
+     */
+    leaveHouse: (data: LeaveHouseDto, params: RequestParams = {}) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/houses/leave`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: "application/json",
+        ...params,
+      }),
+
+    /**
+     * @description Выход из подтверждённого дома или удаление дома после исключения. Отменяет ожидающие заявки в этот дом.
+     *
+     * @tags Houses
+     * @name LeaveHouseMembership
+     * @summary Выход из дома
+     * @request DELETE:/api/houses/membership
+     * @secure
+     */
+    leaveHouseMembership: (
+      data: LeaveHouseMembershipDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/houses/membership`,
+        method: "DELETE",
+        body: data,
+        secure: true,
+        type: "application/json",
+        ...params,
+      }),
+
+    /**
+     * @description Настройки текущего пользователя в подтверждённом доме. Передайте оба переключателя.
+     *
+     * @tags Houses
+     * @name UpdateHouseNotifications
+     * @summary Изменение уведомлений дома
+     * @request PUT:/api/houses/notifications
+     * @secure
+     */
+    updateHouseNotifications: (
+      data: UpdateHouseNotificationsDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<HouseNotificationsDto, ErrorResponseDto>({
+        path: `/api/houses/notifications`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Debug
+     * @name DebugDeleteUser
+     * @summary Удаление пользователя и его связей с домами
+     * @request DELETE:/api/debug/users
+     */
+    debugDeleteUser: (data: DeleteUserDto, params: RequestParams = {}) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/debug/users`,
+        method: "DELETE",
+        body: data,
+        type: "application/json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Debug
+     * @name DebugApproveJoinRequest
+     * @summary Одобрение заявки на присоединение к дому
+     * @request POST:/api/debug/houses/approve
+     */
+    debugApproveJoinRequest: (
+      data: ReviewJoinRequestDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/debug/houses/approve`,
+        method: "POST",
+        body: data,
+        type: "application/json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Debug
+     * @name DebugRejectJoinRequest
+     * @summary Отклонение заявки на присоединение к дому
+     * @request POST:/api/debug/houses/reject
+     */
+    debugRejectJoinRequest: (
+      data: RejectJoinRequestDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/debug/houses/reject`,
+        method: "POST",
+        body: data,
+        type: "application/json",
         ...params,
       }),
   };

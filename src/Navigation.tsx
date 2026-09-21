@@ -10,6 +10,7 @@ import { ProfileDetails } from './views/Requests/Details';
 import { Icon24Meets, Icon24Chats, Icon24Requests, Icon24Manage } from './assets/icons';
 import { useUserStore } from 'src/storage';
 import { FindHome, Login, SetHome } from 'src/views/Login';
+import { api } from 'src/api/client';
 
 export function Navigation() {
   const userInfo = useUserStore((state) => state.user);
@@ -25,8 +26,18 @@ export function Navigation() {
   }, [navigate]);
 
   useEffect(() => {
+    if (!window.WebApp?.initData) {
+      console.log('Для вызова /init открой прилку в Максе');
+      return;
+    }
+
     // @TODO: DELETE 30 SEPTEMBER
     console.log(window.WebApp?.initData);
+
+    api
+      .init()
+      .then(({ data }) => console.log('init:', data))
+      .catch((error: unknown) => console.error('Ошибка /init:', error));
   }, []);
 
   if (!route) return <Navigate to={main} replace />;
