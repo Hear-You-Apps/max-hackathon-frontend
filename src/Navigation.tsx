@@ -18,8 +18,14 @@ export function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const route = routes.find(({ path }) => path === location.pathname);
-  const main = userInfo.home ? paths.meets : paths.login;
+  const hasHouses = userInfo.houses.length > 0 || userInfo.joinRequests.length > 0;
+  const main = hasHouses ? paths.meets : paths.login;
   //const from = (location.state as { from?: string } | null)?.from;
+
+  const hasAdminAccess =
+    userInfo.houses?.some((house) =>
+      house.membership?.roles?.some((role) => role !== 'resident'),
+    ) ?? false;
 
   const goBack = useCallback(() => {
     navigate(-1);
@@ -48,11 +54,11 @@ export function Navigation() {
 
   return (
     <Epic
-      activeStory={userInfo.status === 'logged' ? route.view : 'login'}
+      activeStory={hasHouses ? route.view : 'login'}
       tabbar={
-        userInfo.status === 'logged' ? (
+        hasHouses ? (
           <Tabbar className="app-tabbar" aria-label="Вкладки">
-            {userInfo.admin ? (
+            {hasAdminAccess ? (
               <TabbarItem
                 selected={route.view === 'manage'}
                 label="Управление"

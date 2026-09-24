@@ -6,29 +6,54 @@ import './SetHome.css';
 
 import { useUserStore } from 'src/storage';
 import { IconHomeOutline } from 'src/assets/icons';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { api } from 'src/api/client.ts';
+import useSetHouseStore from 'src/storage/atoms/setHouse/setHouse.ts';
 import { paths } from 'src/navigation/routes.ts';
 
 export function SetHome({ id, onBack }: { id: string; onBack?: () => void }) {
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
+  const { user, setUser } = useUserStore();
+  const { house } = useSetHouseStore();
 
   const [flat, setFlat] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [role, setRole] = useState<0 | 1>(0);
-  const [notifications, setNotifications] = useState<0 | 1>(1);
+  const [name, setName] = useState<string>(user.user.firstName + ' ' + user.user.lastName);
+  const [role, setRole] = useState<'owner' | 'tenant'>('owner');
+  const [notifications, setNotifications] = useState<boolean>(true);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const code = (location.state as { code?: string } | null)?.code ?? '';
 
-  const home = {
-    address: 'ул. Ленина, 24',
-    text: 'УК «Жилсервис» · 412 квартир · 286 жителей уже в приложении',
-  };
+  const home = house;
 
-  const addHome = () => {
-    setUser({ ...user, status: 'logged' });
-    navigate(paths.meets, { state: { from: paths.setHome }, replace: true });
+  useEffect(() => {
+    if (!home) navigate(-1);
+  }, [home, navigate]);
+
+  const addHome = async () => {
+    console.log(home);
+    try {
+      const res = await api.joinHouse({
+        code,
+        apartmentNumber: flat,
+        displayName: name,
+        relationship: role,
+        notifications: {
+          meetings: notifications,
+          requests: notifications,
+        },
+      });
+      console.log(res);
+
+      setUser({
+        ...user,
+        joinRequests: [...(user.joinRequests ?? []), res.data],
+      });
+      navigate(paths.meets, { state: { from: paths.setHome }, replace: true });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -40,8 +65,12 @@ export function SetHome({ id, onBack }: { id: string; onBack?: () => void }) {
             <IconHomeOutline />
           </div>
           <div className={'home-info'}>
-            <div>{home.address}</div>
-            <div>{home.text}</div>
+            <div>{home ? home.address : ''}</div>
+            <div>
+              {home
+                ? `УК «${home.managementCompanyName}» · ${home.apartmentsCount} квартир · ${home.residentsCount} жителей уже в приложении`
+                : ''}
+            </div>
           </div>
         </div>
 
@@ -63,14 +92,14 @@ export function SetHome({ id, onBack }: { id: string; onBack?: () => void }) {
             <div>Кто вы в этой квартире?</div>
             <div className={'selector'}>
               <div
-                onClick={() => setRole(0)}
-                className={`selector-item ${role === 0 ? 'selected' : ''}`}
+                onClick={() => setRole('owner')}
+                className={`selector-item ${role === 'owner' ? 'selected' : ''}`}
               >
                 Собственник
               </div>
               <div
-                onClick={() => setRole(1)}
-                className={`selector-item ${role === 1 ? 'selected' : ''}`}
+                onClick={() => setRole('tenant')}
+                className={`selector-item ${role === 'tenant' ? 'selected' : ''}`}
               >
                 Наниматель
               </div>
@@ -89,8 +118,8 @@ export function SetHome({ id, onBack }: { id: string; onBack?: () => void }) {
           </div>
           <Switch
             defaultChecked
-            value={notifications}
-            onChange={() => setNotifications(notifications ? 0 : 1)}
+            value={Number(notifications)}
+            onChange={() => setNotifications(!notifications)}
           />
         </div>
 

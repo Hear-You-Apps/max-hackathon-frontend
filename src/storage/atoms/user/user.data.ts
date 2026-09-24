@@ -1,7 +1,13 @@
-import type { AtomUserI } from '.';
+import type { InitResponseDto } from 'src/api/api.ts';
 
-export const ATOM_USER_DEFAULT_DATA: AtomUserI = {
-  status: 'logged',
-  home: ['123123'],
-  admin: false,
+export const ATOM_USER_DEFAULT_DATA: InitResponseDto = {
+  houses: [],
+  joinRequests: [],
+  user: {
+    id: 0,
+    firstName: '',
+    lastName: '',
+    username: '',
+    photoUrl: '',
+  },
 };

@@ -106,6 +106,8 @@ export interface MyHouseMembershipDto {
 }
 
 export interface MyHouseDto {
+  code: string;
+  residentsCount: number;
   /** @example 10 */
   id: number;
   /** @example "ул. Ленина, 24" */

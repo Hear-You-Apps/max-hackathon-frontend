@@ -1,5 +1,5 @@
 import { Panel as MaxPanel } from '@maxhub/max-ui';
-import { Panel } from '@vkontakte/vkui';
+import { Panel, ScreenSpinner } from '@vkontakte/vkui';
 
 import './FindHome.css';
 import { Button, Header } from 'src/components';
@@ -7,34 +7,80 @@ import { useState } from 'react';
 import { IconHomeOutline } from 'src/assets/icons';
 import { paths } from 'src/navigation/routes.ts';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from 'src/storage';
+import { api } from 'src/api/client.ts';
+import type { FoundHouseDto } from 'src/api/api.ts';
+import useSetHouseStore from 'src/storage/atoms/setHouse/setHouse.ts';
 
 export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
+  const { setHouse } = useSetHouseStore();
 
-  const [inputValue, setInputValue] = useState(user.home ?? '');
-  //const [error, setError] = useState<boolean>(false);
-  const [home, setHome] = useState<{ address: string; text: string } | undefined>(undefined);
+  const [inputValue, setInputValue] = useState('NEV-64-A7');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [home, setHome] = useState<
+    { address: string; text: string; data: FoundHouseDto } | undefined
+  >(undefined);
 
   const navigate = useNavigate();
 
-  const find = () => {
-    setHome({
-      address: 'ул. Ленина, 24',
-      text: 'УК «Жилсервис» · 412 квартир · 286 жителей уже в приложении',
-    });
+  const find = async () => {
+    setError(null);
+    setHome(undefined);
+    setLoading(true);
+
+    try {
+      const res = await api.searchHouse({ code: inputValue });
+
+      setHome({
+        data: res.data.house,
+        address: res.data.house.address,
+        text: `УК «${res.data.house.managementCompanyName}» · ${res.data.house.apartmentsCount} квартир · ${res.data.house.residentsCount} жителей уже в приложении`,
+      });
+    } catch (error) {
+      console.error('Search house error:', error);
+
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'error' in error &&
+        typeof error.error === 'object' &&
+        error.error !== null &&
+        'code' in error.error
+      ) {
+        const apiError = error.error as { code?: string; message?: string };
+
+        if (apiError.code === 'INVITATION_NOT_FOUND') {
+          setError('Дом с таким кодом приглашения не найден');
+          return;
+        }
+
+        setError(apiError.message ?? 'Не удалось найти дом');
+        return;
+      }
+
+      setError('Не удалось выполнить поиск дома');
+    }
+    setLoading(false);
   };
 
   const set = () => {
-    setUser({ ...user, home: ['LEN-54-3Q'] });
-    navigate(paths.setHome, { state: { from: paths.findHome } });
+    if (!home) return;
+
+    setHouse(home.data);
+    navigate(paths.setHome, {
+      state: {
+        from: paths.findHome,
+        code: inputValue,
+      },
+    });
   };
 
   return (
     <Panel id={id}>
       <Header back={onBack}>Код дома</Header>
       <MaxPanel className="page-content find-home">
+        {loading ? <ScreenSpinner /> : null}
+
         <div className="tip">
           Введите код с доски объявлений или из сообщения администратора. Код выглядит как три части
           через дефис.
@@ -44,14 +90,38 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
           <div>Код дома</div>
           <input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={'Код дома'}
+            onChange={(e) => {
+              const value = e.target.value
+                .toUpperCase()
+                .replace(/[^A-ZА-Я0-9]/g, '')
+                .slice(0, 7);
+
+              let formatted = value;
+
+              if (value.length > 3) {
+                formatted = `${value.slice(0, 3)}-${value.slice(3, 5)}`;
+
+                if (value.length > 5) {
+                  formatted += `-${value.slice(5)}`;
+                }
+              }
+
+              setInputValue(formatted);
+              setError(null);
+            }}
+            placeholder="Код дома"
+            maxLength={9}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
           />
         </div>
 
-        <Button disabled={!inputValue} onClick={() => find()}>
+        <Button disabled={inputValue.length < 9} onClick={find}>
           Найти дом
         </Button>
+
+        {error}
 
         {home ? (
           <>
