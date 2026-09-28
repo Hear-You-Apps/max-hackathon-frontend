@@ -405,6 +405,7 @@ export interface HouseEventsResponseDto {
 }
 
 export interface HouseInfoDto {
+  residentsCount: number;
   /** @example 10 */
   id: number;
   /** @example "ул. Ленина, 24" */
