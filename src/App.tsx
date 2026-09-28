@@ -10,21 +10,24 @@ import { Navigation } from './Navigation';
 import { api } from 'src/api/client.ts';
 import { useCallback, useEffect, useState } from 'react';
 import { useUserStore } from 'src/storage';
+import useSelectedHouseStore from 'src/storage/atoms/selectedHome/selectedHome.ts';
 
 export function App() {
   const { setUser } = useUserStore();
+  const { setSelectedHouse } = useSelectedHouseStore();
   const [isInitializing, setIsInitializing] = useState(true);
 
   const getUser = useCallback(async () => {
     try {
       const { data } = await api.init();
       setUser(data);
+      if (data.houses) setSelectedHouse(data.houses[0]);
     } catch (error) {
       console.error('Ошибка /init:', error);
     } finally {
       setIsInitializing(false);
     }
-  }, [setUser]);
+  }, [setSelectedHouse, setUser]);
 
   useEffect(() => {
     getUser();

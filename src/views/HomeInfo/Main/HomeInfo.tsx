@@ -1,5 +1,5 @@
 import { Panel as MaxPanel } from '@maxhub/max-ui';
-import { Panel } from '@vkontakte/vkui';
+import { Panel, Spinner } from '@vkontakte/vkui';
 import { Button, Cell, Header } from 'src/components';
 
 import './HomeInfo.css';
@@ -7,34 +7,37 @@ import {
   Icon24Chats,
   IconCall,
   IconChevronRight,
-  IconClock,
   IconHome,
   IconInfo,
   IconLocation,
   IconSetting,
 } from 'src/assets/icons';
-import { useUserStore } from 'src/storage';
-import type { HouseContactDto } from 'src/api/api.ts';
-/*import { api } from 'src/api/client.ts';
-import { useCallback, useEffect } from 'react';*/
+import type { HouseChatDto, HouseContactDto } from 'src/api/api.ts';
+import { api } from 'src/api/client.ts';
+import { useCallback, useEffect } from 'react';
+import useSelectedHouseStore from 'src/storage/atoms/selectedHome/selectedHome.ts';
 
 export function HomeInfo({ id }: { id: string }) {
-  const { user } = useUserStore();
-  const home = user.houses[0];
+  const { house, homeInfo, setHomeInfo, setChats } = useSelectedHouseStore();
 
-  /*const getHomeInfo = useCallback(async () => {
+  const getHomeInfo = useCallback(async () => {
+    if (!house || homeInfo) return;
+
     try {
-      const res = await api.getHouse(1);
-
-      console.log(res);
+      const res = await api.getHouse(house.id);
+      setHomeInfo(res.data);
+      const res_chats = await api.getHouseChats(house.id);
+      setChats(res_chats.data as unknown as HouseChatDto[]);
     } catch (error) {
       console.error(error);
     }
-  }, []);
+  }, [homeInfo, house, setChats, setHomeInfo]);
 
   useEffect(() => {
-    getHomeInfo();
-  });*/
+    void getHomeInfo();
+  }, [getHomeInfo]);
+
+  const loading = !homeInfo;
 
   const getInitials = (name: string) => {
     const words = name.trim().split(/\s+/).filter(Boolean);
@@ -45,44 +48,9 @@ export function HomeInfo({ id }: { id: string }) {
     return `${words[0][0]}${words[1][0]}`.toUpperCase();
   };
 
-  const contacts: HouseContactDto[] = [
-    {
-      id: 1,
-      type: 'dispatcher',
-      name: 'Диспетчерская УК',
-      phone: '+78120000000',
-      address: 'string',
-      workingHours: 'Круглосуточно',
-      messengerUrl: 'string',
-    },
-    {
-      id: 2,
-      type: 'emergency',
-      name: 'Диспетчерская УК',
-      phone: '+78120000000',
-      address: 'string',
-      workingHours: 'Круглосуточно',
-      messengerUrl: 'string',
-    },
-    {
-      id: 3,
-      type: 'plumber',
-      name: 'Диспетчерская УК',
-      phone: '+78120000000',
-      address: 'string',
-      workingHours: 'Круглосуточно',
-      messengerUrl: 'string',
-    },
-    {
-      id: 4,
-      type: 'other',
-      name: 'Галина Петровна',
-      phone: '+78120000000',
-      address: 'string',
-      workingHours: 'Круглосуточно',
-      messengerUrl: 'string',
-    },
-  ];
+  const formatDate = (date: string) => {
+    return `${new Date(date).toLocaleDateString('ru-RU', {})}`;
+  };
 
   const getContactIcon = (contact: HouseContactDto) => {
     switch (contact.type) {
@@ -103,34 +71,38 @@ export function HomeInfo({ id }: { id: string }) {
     <Panel id={id}>
       <Header>Мой дом</Header>
       <MaxPanel className="page-content home">
+        {loading ? <Spinner style={{ padding: 16 }} size={'xl'} /> : null}
+
         <div className={'home-card current-home'}>
           <Cell
             icon={<IconHome />}
-            label={home.address}
-            text={`УК «${home.managementCompanyName}» · ${home.apartmentsCount} квартир · ${home.residentsCount} жителей уже в приложении`}
+            label={homeInfo?.house.address ?? ''}
+            text={`УК «${homeInfo?.house.managementCompanyName}» · ${homeInfo?.house.apartmentsCount} квартир · ${homeInfo?.house.residentsCount} жителей уже в приложении`}
             size={'l'}
             after={<IconChevronRight />}
           />
         </div>
 
-        <div className={'home-contacts'}>
-          <div className={'home-info-header'}>контакты</div>
-          {contacts.map((contact: HouseContactDto) => (
-            <Cell
-              icon={getContactIcon(contact)}
-              label={contact.name}
-              text={`${contact.phone} · ${contact.workingHours}`}
-              after={<IconChevronRight />}
-            />
-          ))}
-        </div>
+        {homeInfo?.contacts && homeInfo?.contacts.length > 0 ? (
+          <div>
+            <div className={'home-info-header'}>контакты</div>
+            {homeInfo?.contacts.map((contact: HouseContactDto) => (
+              <Cell
+                icon={getContactIcon(contact)}
+                label={contact.name}
+                text={`${contact.phone} · ${contact.workingHours}`}
+                after={<IconChevronRight />}
+              />
+            ))}
+          </div>
+        ) : null}
 
         <div>
           <div className={'home-info-header'}>чаты</div>
           <Cell
             icon={<Icon24Chats />}
             label={'Чаты'}
-            text={'Общий чат дома, Подъезд 3, Совет....'}
+            text={''}
             size={'l'}
             after={<IconChevronRight />}
           />
@@ -148,19 +120,21 @@ export function HomeInfo({ id }: { id: string }) {
           <div className={'public-service__bottom'}>История платежей и квитанции</div>
         </div>
 
-        <div>
-          <div className={'home-info-header'}>ближашее</div>
-          <Cell
-            icon={<IconInfo className={'warning'} />}
-            label={'Отключение горячей воды'}
-            text={'19 сентября, 10:00–16:00 · плановые работы'}
-          />
-          <Cell
-            icon={<IconClock />}
-            label={'Уборка подъездов'}
-            text={'Влажная уборка пн и чт · мытьё окон 25 сентября'}
-          />
-        </div>
+        {homeInfo?.upcomingEvents && homeInfo?.upcomingEvents.length > 0 ? (
+          <div>
+            <div className={'home-info-header'}>ближашее</div>
+
+            {homeInfo.upcomingEvents.map((el) => {
+              return (
+                <Cell
+                  icon={<IconInfo className={el.type === 'water_outage' ? 'warning' : ''} />}
+                  label={el.title}
+                  text={`${formatDate(el.startsAt)} · ${el.description}`}
+                />
+              );
+            })}
+          </div>
+        ) : null}
       </MaxPanel>
     </Panel>
   );
