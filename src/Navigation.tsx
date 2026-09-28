@@ -7,10 +7,11 @@ import { HomeDetails } from './views/Meets/Details';
 import { Requests } from './views/Requests/Requests';
 import { ProfileDetails } from './views/Requests/Details';
 
-import { Icon24Meets, Icon24Chats, Icon24Requests, Icon24Manage } from './assets/icons';
+import { Icon24Meets, Icon24Requests, Icon24Manage, IconHome } from './assets/icons';
 import { useUserStore } from 'src/storage';
 import { FindHome, Login, SetHome } from 'src/views/Login';
 import { api } from 'src/api/client';
+import { HomeInfo } from 'src/views/HomeInfo';
 
 export function Navigation() {
   const userInfo = useUserStore((state) => state.user);
@@ -18,8 +19,9 @@ export function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const route = routes.find(({ path }) => path === location.pathname);
-  const hasHouses = userInfo.houses.length > 0 || userInfo.joinRequests.length > 0;
-  const main = hasHouses ? paths.meets : paths.login;
+  const hasHouses = userInfo.houses.length > 0;
+  const hasJoinRequests = userInfo.joinRequests?.length > 0;
+  const main = hasHouses ? paths.meets : hasJoinRequests ? paths.setHome : paths.login;
   //const from = (location.state as { from?: string } | null)?.from;
 
   const hasAdminAccess =
@@ -50,6 +52,7 @@ export function Navigation() {
 
   const meetsPanel = route.view === 'meets' ? route.panel : 'meets-main';
   const requestsPanel = route.view === 'requests' ? route.panel : 'requests-user';
+  const homeInfoPanel = route.view === 'home' ? route.panel : 'home-info';
   const loginPanel = route.view === 'login' ? route.panel : 'login-main';
 
   return (
@@ -86,11 +89,11 @@ export function Navigation() {
               />
             </TabbarItem>
             <TabbarItem
-              selected={route.view === 'chats'}
-              label="Чаты"
-              onClick={() => navigate(paths.chats, { replace: true })}
+              selected={route.view === 'home'}
+              label="Дом"
+              onClick={() => navigate(paths.homeInfo, { replace: true })}
             >
-              <Icon24Chats className={`icon-chats ${route.view === 'chats' ? 'active' : ''}`} />
+              <IconHome className={`icon-home ${route.view === 'home' ? 'active' : ''}`} />
             </TabbarItem>
           </Tabbar>
         ) : null
@@ -110,7 +113,7 @@ export function Navigation() {
       >
         <Login id={'login-main'} />
         <FindHome id={'login-find'} onBack={goBack} />
-        <SetHome id={'set-home'} onBack={goBack} />
+        <SetHome id={'set-home'} onBack={goBack} requests={hasJoinRequests} />
       </View>
 
       <View
@@ -134,6 +137,14 @@ export function Navigation() {
       >
         <Requests id="requests-main" />
         <ProfileDetails id="profile-details" onBack={goBack} />
+      </View>
+      <View
+        id="home"
+        activePanel={homeInfoPanel}
+        history={homeInfoPanel === 'home-info' ? ['home-info'] : ['home-info', 'home-chats']}
+        onSwipeBack={goBack}
+      >
+        <HomeInfo id="home-info" />
       </View>
     </Epic>
   );

@@ -2,6 +2,7 @@ import './PanelHeader.css';
 import { PanelHeader } from '@vkontakte/vkui';
 import { IconArrowLeftOutline } from 'src/assets/icons';
 import * as React from 'react';
+import { useUserStore } from 'src/storage';
 
 export function Header({
   back,
@@ -14,6 +15,9 @@ export function Header({
   after?: React.ReactNode;
   isHome?: boolean;
 }) {
+  const { user } = useUserStore();
+  const home = user.houses[0];
+
   return (
     <PanelHeader
       className={'header'}
@@ -28,8 +32,10 @@ export function Header({
     >
       {isHome ? (
         <div className={'home-header'}>
-          <div>ул. Ленина, 24</div>
-          <div>412 квартир · 286 в приложении</div>
+          <div>{home.address}</div>
+          <div>
+            {home.apartmentsCount} квартир · {home.residentsCount ?? 0} в приложении
+          </div>
         </div>
       ) : (
         children

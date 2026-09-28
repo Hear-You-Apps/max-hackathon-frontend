@@ -10,6 +10,7 @@ export const paths = {
   request: '/requests/request',
   chats: '/chats',
   homeInfo: '/home',
+  homeChats: '/homeChats',
   manage: '/manage',
 } as const;
 
@@ -25,5 +26,6 @@ export const routes = [
   { path: paths.newRequest, view: 'requests', panel: 'requests-new', main: paths.requests },
   { path: paths.chats, view: 'chats', panel: 'chats-user', main: paths.chats },
   { path: paths.homeInfo, view: 'home', panel: 'home-info', main: paths.homeInfo },
+  { path: paths.homeChats, view: 'home', panel: 'home-chats', main: paths.homeInfo },
   { path: paths.manage, view: 'manage', panel: 'manage-main', main: paths.manage },
 ] as const;

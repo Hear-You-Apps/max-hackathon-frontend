@@ -9,3 +9,9 @@ export { default as IconArrowLeftOutline } from './arrow_left_outline.svg?react'
 export { default as IconHomeOutline } from './home_outline.svg?react';
 export { default as IconNotificationOutline } from './notification_outline.svg?react';
 export { default as IconAdd } from './add.svg?react';
+export { default as IconHome } from './home.svg?react';
+export { default as IconCall } from './call.svg?react';
+export { default as IconLocation } from './location.svg?react';
+export { default as IconSetting } from './setting.svg?react';
+export { default as IconClock } from './clock.svg?react';
+export { default as IconInfo } from './info-circle.svg?react';

@@ -10,14 +10,70 @@
  * ---------------------------------------------------------------
  */
 
+export type RequestsStatusFilter =
+  | "all"
+  | "open"
+  | "submitted"
+  | "in_review"
+  | "in_progress"
+  | "resolved"
+  | "closed"
+  | "cancelled";
+
+export type RequestsScope = "mine" | "house";
+
+/** submitted: отправлена, in_review: на рассмотрении, in_progress: решается, resolved: ждёт подтверждения, closed: закрыта, cancelled: отменена */
+export type RequestStatus =
+  | "submitted"
+  | "in_review"
+  | "in_progress"
+  | "resolved"
+  | "closed"
+  | "cancelled";
+
+export type RequestVisibility = "private" | "house";
+
+export type RequestLocationType = "apartment" | "entrance" | "yard";
+
+export type RequestCategory = "management" | "electrician" | "plumber" | "duty";
+
+export type MeetingsPeriod = "actual" | "past";
+
+/** Свой голос по вопросу, null если ещё не голосовали */
+export type MeetingVoteChoice = "yes" | "no" | "abstain";
+
+/** scheduled: ещё не началось, active: идёт, closed: завершено, cancelled: отменено */
+export type MeetingStatus = "scheduled" | "active" | "closed" | "cancelled";
+
+/** in_person: очная, absentee: заочная, mixed: очно-заочная */
+export type MeetingFormat = "in_person" | "absentee" | "mixed";
+
+export type HouseContactType =
+  | "dispatcher"
+  | "emergency"
+  | "plumber"
+  | "electrician"
+  | "representative"
+  | "passport_office"
+  | "other";
+
+export type HouseEventType =
+  | "water_outage"
+  | "power_outage"
+  | "cleaning"
+  | "maintenance"
+  | "other";
+
+export type HouseEventsPeriod = "all" | "upcoming" | "past";
+
+/** chat: чат, channel: канал */
+export type HouseChatType = "chat" | "channel";
+
 export type HouseJoinRequestStatus =
   | "pending"
   | "approved"
   | "rejected"
   | "cancelled";
-
-/** Права просмотра. При отозванном доступе список пуст. */
-export type HousePermission = "houses.read" | "meetings.read" | "requests.read";
 
 export type ApartmentVerificationStatus = "pending" | "verified" | "rejected";
 
@@ -43,7 +99,23 @@ export type ErrorCode =
   | "JOIN_REQUEST_OUTDATED"
   | "APARTMENT_ALREADY_LINKED"
   | "HOUSE_REJOIN_UNAVAILABLE"
-  | "HOUSE_MEMBERSHIP_NOT_FOUND";
+  | "HOUSE_MEMBERSHIP_NOT_FOUND"
+  | "HOUSE_NOT_AVAILABLE"
+  | "HOUSE_ADMIN_REQUIRED"
+  | "MEETING_NOT_AVAILABLE"
+  | "MEETING_CREATE_FORBIDDEN"
+  | "INVALID_MEETING_DATES"
+  | "MEETING_LOCATION_REQUIRED"
+  | "MEETING_VOTE_FORBIDDEN"
+  | "MEETING_VOTING_UNAVAILABLE"
+  | "INVALID_MEETING_QUESTIONS"
+  | "MEETING_PARTICIPATION_UNAVAILABLE"
+  | "REQUEST_NOT_AVAILABLE"
+  | "INVALID_REQUEST_LOCATION"
+  | "REQUEST_APARTMENT_NOT_AVAILABLE"
+  | "REQUEST_ATTACHMENTS_NOT_AVAILABLE"
+  | "FILE_NOT_AVAILABLE"
+  | "INVALID_FILE";
 
 export interface HealthResponseDto {
   /** @example "ok" */
@@ -114,26 +186,22 @@ export interface MyHouseDto {
   address: string;
   /** @example "Жилсервис" */
   managementCompanyName: string | null;
-  /** Ссылка для связи с администратором дома */
-  adminContactUrl: string | null;
   /** @example 412 */
   apartmentsCount: number | null;
   /** @example 6 */
   entrancesCount: number | null;
+  /** Ссылка для связи с администратором дома. Доступна при подтверждённом членстве. */
+  adminContactUrl: string | null;
   membership: MyHouseMembershipDto;
-  /** Права просмотра. При отозванном доступе список пуст. */
-  permissions: HousePermission[];
 }
 
-export interface HouseSummaryDto {
+export interface HousePreviewDto {
   /** @example 10 */
   id: number;
   /** @example "ул. Ленина, 24" */
   address: string;
   /** @example "Жилсервис" */
   managementCompanyName: string | null;
-  /** Ссылка для связи с администратором дома */
-  adminContactUrl: string | null;
   /** @example 412 */
   apartmentsCount: number | null;
   /** @example 6 */
@@ -143,7 +211,7 @@ export interface HouseSummaryDto {
 export interface MyHouseJoinRequestDto {
   /** @example 25 */
   id: number;
-  house: HouseSummaryDto;
+  house: HousePreviewDto;
   /** @example "112" */
   apartmentNumber: string;
   /** @example "Александр Кузнецов" */
@@ -153,7 +221,6 @@ export interface MyHouseJoinRequestDto {
   /** @example null */
   rejectionReason: string | null;
   notifications: HouseNotificationsDto;
-  permissions: HousePermission[];
 }
 
 export interface UserProfileDto {
@@ -191,8 +258,6 @@ export interface FoundHouseDto {
   address: string;
   /** @example "Жилсервис" */
   managementCompanyName: string | null;
-  /** Ссылка для связи с администратором дома */
-  adminContactUrl: string | null;
   /** @example 412 */
   apartmentsCount: number | null;
   /** @example 6 */
@@ -268,6 +333,128 @@ export interface UpdateHouseNotificationsDto {
   houseId: number;
 }
 
+export interface HouseChatDto {
+  /**
+   * ID записи
+   * @example 1
+   */
+  id: number;
+  /** chat: чат, channel: канал */
+  type: HouseChatType;
+  /**
+   * Название
+   * @example "Общий чат дома"
+   */
+  name: string;
+  /** Описание */
+  description: string | null;
+  /**
+   * Ссылка для открытия в MAX
+   * @format uri
+   */
+  url: string;
+}
+
+export interface HouseChatsResponseDto {
+  /** Чаты и каналы дома */
+  items: HouseChatDto[];
+}
+
+export interface HouseEventDto {
+  /** @example 1 */
+  id: number;
+  type: HouseEventType;
+  /** @example "Отключение горячей воды" */
+  title: string;
+  /** @example "Плановые работы" */
+  description: string | null;
+  /**
+   * @format date-time
+   * @example "2026-10-01T07:00:00.000Z"
+   */
+  startsAt: string;
+  /**
+   * @format date-time
+   * @example "2026-10-01T13:00:00.000Z"
+   */
+  endsAt: string | null;
+  /** @example "Подъезды 1–3" */
+  location: string | null;
+  /** @example false */
+  isCancelled: boolean;
+}
+
+export interface HouseEventsResponseDto {
+  /** События текущей страницы */
+  items: HouseEventDto[];
+  /**
+   * Номер страницы
+   * @example 1
+   */
+  page: number;
+  /**
+   * Размер страницы
+   * @example 20
+   */
+  limit: number;
+  /**
+   * Общее количество событий дома с учётом выбранного периода
+   * @example 42
+   */
+  total: number;
+}
+
+export interface HouseInfoDto {
+  /** @example 10 */
+  id: number;
+  /** @example "ул. Ленина, 24" */
+  address: string;
+  /** @example "Жилсервис" */
+  managementCompanyName: string | null;
+  /** @example 412 */
+  apartmentsCount: number | null;
+  /** @example 6 */
+  entrancesCount: number | null;
+  /** Ссылка для связи с администратором дома. Доступна при подтверждённом членстве. */
+  adminContactUrl: string | null;
+  /** @example 1998 */
+  yearBuilt: number | null;
+}
+
+export interface HouseContactDto {
+  /** @example 1 */
+  id: number;
+  type: HouseContactType;
+  /** @example "Диспетчерская УК" */
+  name: string;
+  /** @example "+78120000000" */
+  phone: string | null;
+  address: string | null;
+  /** @example "Круглосуточно" */
+  workingHours: string | null;
+  /** @format uri */
+  messengerUrl: string | null;
+}
+
+export interface HouseUtilitiesDto {
+  /**
+   * Общая ссылка на оплату или личный кабинет поставщика
+   * @format uri
+   */
+  paymentUrl: string | null;
+}
+
+export interface HouseDetailsResponseDto {
+  house: HouseInfoDto;
+  contacts: HouseContactDto[];
+  utilities: HouseUtilitiesDto;
+  /**
+   * До трёх текущих и ближайших событий по дате начала
+   * @maxItems 3
+   */
+  upcomingEvents: HouseEventDto[];
+}
+
 export interface DeleteUserDto {
   /**
    * ID пользователя в нашей БД
@@ -299,6 +486,493 @@ export interface RejectJoinRequestDto {
    * @example "Неверно указан номер квартиры"
    */
   reason: string;
+}
+
+export interface CreateMeetingQuestionDto {
+  /**
+   * @maxLength 2000
+   * @example "Установить шлагбаум во дворе?"
+   */
+  title: string;
+}
+
+export interface CreateMeetingDto {
+  /**
+   * @maxLength 255
+   * @example "Установка шлагбаума во дворе"
+   */
+  title: string;
+  /**
+   * @maxLength 10000
+   * @example "Обсудим въезд во двор и стоимость установки"
+   */
+  description?: string | null;
+  /** in_person: очная, absentee: заочная, mixed: очно-заочная */
+  format: MeetingFormat;
+  /**
+   * Место обязательно для очного и очно-заочного собрания
+   * @maxLength 500
+   * @example "У второго подъезда"
+   */
+  location?: string | null;
+  /**
+   * Начало собрания с часовым поясом, дата должна быть в будущем
+   * @format date-time
+   * @example "2026-10-01T16:00:00.000Z"
+   */
+  startsAt: string;
+  /**
+   * Окончание собрания с часовым поясом, позже начала
+   * @format date-time
+   * @example "2026-10-07T20:59:00.000Z"
+   */
+  endsAt: string;
+  /**
+   * Вопросы в порядке повестки
+   * @maxItems 100
+   * @minItems 1
+   */
+  questions: CreateMeetingQuestionDto[];
+}
+
+export interface MeetingParticipationResponseDto {
+  /**
+   * Свой ответ, null если ещё не отмечались
+   * @example true
+   */
+  willAttend: boolean | null;
+  /**
+   * Сколько подтверждённых жителей планируют прийти
+   * @example 12
+   */
+  goingCount: number;
+}
+
+export interface MeetingAuthorDto {
+  /** @example 1 */
+  id: number;
+  /**
+   * Имя автора
+   * @example "Олег Чикелев"
+   */
+  name: string;
+}
+
+export interface MeetingVoteResultsDto {
+  /**
+   * Голоса за
+   * @example 42
+   */
+  yes: number;
+  /**
+   * Голоса против
+   * @example 8
+   */
+  no: number;
+  /**
+   * Воздержались
+   * @example 3
+   */
+  abstain: number;
+}
+
+export interface MeetingQuestionDto {
+  /** @example 1 */
+  id: number;
+  /** @example "Установить шлагбаум во дворе?" */
+  title: string;
+  /** Свой голос по вопросу, null если ещё не голосовали */
+  myVote: MeetingVoteChoice | null;
+  /** Текущие результаты */
+  results: MeetingVoteResultsDto;
+}
+
+export interface MeetingDetailsResponseDto {
+  /** @example 1 */
+  id: number;
+  /**
+   * ID дома
+   * @example 1
+   */
+  houseId: number;
+  /** @example "Установка шлагбаума во дворе" */
+  title: string;
+  /** in_person: очная, absentee: заочная, mixed: очно-заочная */
+  format: MeetingFormat;
+  /** scheduled: ещё не началось, active: идёт, closed: завершено, cancelled: отменено */
+  status: MeetingStatus;
+  /** @example "У второго подъезда" */
+  location: string | null;
+  /**
+   * @format date-time
+   * @example "2026-10-01T16:00:00.000Z"
+   */
+  startsAt: string;
+  /**
+   * @format date-time
+   * @example "2026-10-07T20:59:00.000Z"
+   */
+  endsAt: string;
+  /**
+   * Пользователи, ответившие хотя бы на один вопрос. Каждый считается один раз
+   * @example 53
+   */
+  participantsCount: number;
+  /** Свой ответ и число планирующих прийти, null для заочного собрания */
+  participation: MeetingParticipationResponseDto | null;
+  /** @example "Обсудим въезд во двор и стоимость установки" */
+  description: string | null;
+  /** Автор собрания, null если аккаунт удалён */
+  author: MeetingAuthorDto | null;
+  /** Вопросы в порядке повестки */
+  questions: MeetingQuestionDto[];
+}
+
+export interface MeetingListItemDto {
+  /** @example 1 */
+  id: number;
+  /**
+   * ID дома
+   * @example 1
+   */
+  houseId: number;
+  /** @example "Установка шлагбаума во дворе" */
+  title: string;
+  /** in_person: очная, absentee: заочная, mixed: очно-заочная */
+  format: MeetingFormat;
+  /** scheduled: ещё не началось, active: идёт, closed: завершено, cancelled: отменено */
+  status: MeetingStatus;
+  /** @example "У второго подъезда" */
+  location: string | null;
+  /**
+   * @format date-time
+   * @example "2026-10-01T16:00:00.000Z"
+   */
+  startsAt: string;
+  /**
+   * @format date-time
+   * @example "2026-10-07T20:59:00.000Z"
+   */
+  endsAt: string;
+  /**
+   * Пользователи, ответившие хотя бы на один вопрос. Каждый считается один раз
+   * @example 53
+   */
+  participantsCount: number;
+  /**
+   * Количество вопросов
+   * @example 3
+   */
+  questionsCount: number;
+  /** Первый вопрос для карточки в списке, null если вопросов нет */
+  firstQuestion: MeetingQuestionDto | null;
+}
+
+export interface MeetingsResponseDto {
+  /** Собрания текущей страницы */
+  items: MeetingListItemDto[];
+  /**
+   * Номер страницы
+   * @example 1
+   */
+  page: number;
+  /**
+   * Размер страницы
+   * @example 20
+   */
+  limit: number;
+  /**
+   * Количество собраний за выбранный период
+   * @example 42
+   */
+  total: number;
+}
+
+export interface UpdateMeetingParticipationDto {
+  /**
+   * true: приду, false: не приду
+   * @example true
+   */
+  willAttend: boolean;
+}
+
+export interface MeetingVoteDto {
+  /**
+   * ID вопроса
+   * @min 1
+   * @max 4294967295
+   * @example 1
+   */
+  questionId: number;
+  /**
+   * yes: за, no: против, abstain: воздержался
+   * @example "yes"
+   */
+  choice: MeetingVoteChoice;
+}
+
+export interface UpdateMeetingVotesDto {
+  /**
+   * Ответы на вопросы без повторяющихся questionId
+   * @maxItems 100
+   * @minItems 1
+   */
+  votes: MeetingVoteDto[];
+}
+
+export interface MeetingVotesResponseDto {
+  /** Все свои ответы по собранию в порядке повестки */
+  votes: MeetingVoteDto[];
+}
+
+export interface RequestAuthorDto {
+  /** @example 1 */
+  id: number;
+  /** @example "Олег Чикелев" */
+  name: string;
+}
+
+export interface RequestApartmentDto {
+  /** @example 1 */
+  id: number;
+  /** @example "112" */
+  number: string;
+}
+
+export interface FileDto {
+  /** @example 1 */
+  id: number;
+  /**
+   * Исходное имя файла
+   * @example "photo.jpg"
+   */
+  name: string;
+  /** @example "image/jpeg" */
+  mimeType: string;
+  /**
+   * Размер в байтах
+   * @example 245760
+   */
+  size: number;
+  /**
+   * Скачать по урл
+   * @example "/api/files/1"
+   */
+  url: string;
+}
+
+export interface RequestEventDto {
+  /** @example 1 */
+  id: number;
+  status: RequestStatus;
+  /** @example "Мастер приедет завтра утром" */
+  comment: string | null;
+  /**
+   * @format date-time
+   * @example "2026-09-27T09:12:00.000Z"
+   */
+  createdAt: string;
+}
+
+export interface RequestDetailsResponseDto {
+  /** @example 148 */
+  id: number;
+  /** @example 1 */
+  houseId: number;
+  /** @example "Течёт кровля над пятым подъездом" */
+  title: string;
+  category: RequestCategory;
+  locationType: RequestLocationType;
+  visibility: RequestVisibility;
+  /** submitted: отправлена, in_review: на рассмотрении, in_progress: решается, resolved: ждёт подтверждения, closed: закрыта, cancelled: отменена */
+  status: RequestStatus;
+  /**
+   * @format date-time
+   * @example "2026-09-27T09:12:00.000Z"
+   */
+  createdAt: string;
+  /** Автор, null если аккаунт удалён */
+  author: RequestAuthorDto | null;
+  /**
+   * Заявка текущего пользователя
+   * @example true
+   */
+  isMine: boolean;
+  /** @example "После дождя вода течёт по стене у лифта" */
+  description: string;
+  /** @example "Пятый подъезд, девятый этаж" */
+  locationText: string | null;
+  /** Квартира видна автору и админам, для остальных null */
+  apartment: RequestApartmentDto | null;
+  /** Фото и документы заявки */
+  attachments: FileDto[];
+  /** История обработки от старых событий к новым */
+  events: RequestEventDto[];
+}
+
+export interface RequestDto {
+  /** @example 148 */
+  id: number;
+  /** @example 1 */
+  houseId: number;
+  /** @example "Течёт кровля над пятым подъездом" */
+  title: string;
+  category: RequestCategory;
+  locationType: RequestLocationType;
+  visibility: RequestVisibility;
+  /** submitted: отправлена, in_review: на рассмотрении, in_progress: решается, resolved: ждёт подтверждения, closed: закрыта, cancelled: отменена */
+  status: RequestStatus;
+  /**
+   * @format date-time
+   * @example "2026-09-27T09:12:00.000Z"
+   */
+  createdAt: string;
+  /** Автор, null если аккаунт удалён */
+  author: RequestAuthorDto | null;
+  /**
+   * Заявка текущего пользователя
+   * @example true
+   */
+  isMine: boolean;
+}
+
+export interface RequestsResponseDto {
+  items: RequestDto[];
+  /** @example 1 */
+  page: number;
+  /** @example 20 */
+  limit: number;
+  /**
+   * Всего заявок с учётом фильтров и доступа
+   * @example 42
+   */
+  total: number;
+}
+
+export interface CreateRequestDto {
+  /**
+   * @maxLength 255
+   * @example "Течёт кровля над пятым подъездом"
+   */
+  title: string;
+  /**
+   * @maxLength 10000
+   * @example "После дождя вода течёт по стене у лифта"
+   */
+  description: string;
+  /** management: УК, electrician: электрик, plumber: сантехник, duty: дежурная служба */
+  category: RequestCategory;
+  /** apartment: квартира, entrance: подъезд, yard: двор */
+  locationType: RequestLocationType;
+  /**
+   * Своя подтверждённая квартира, обязательно для apartment
+   * @min 1
+   * @max 4294967295
+   */
+  apartmentId?: number | null;
+  /**
+   * Уточнение места, обязательно для подъезда и двора
+   * @maxLength 500
+   * @example "Подъезд 5, девятый этаж, у лифта"
+   */
+  locationText?: string | null;
+  /**
+   * private: только автор и админы, house: видно соседям
+   * @default "private"
+   */
+  visibility?: RequestVisibility;
+  /**
+   * ID своих файлов, загруженных в этом доме
+   * @maxItems 5
+   * @uniqueItems true
+   * @default []
+   */
+  attachmentIds?: number[];
+}
+
+export interface AdminHouseStatsDto {
+  /**
+   * Новые заявки в УК со статусом submitted, включая приватные
+   * @min 0
+   * @example 12
+   */
+  newRequestsCount: number;
+  /**
+   * Все заявки в УК кроме closed и cancelled, включая новые и приватные
+   * @min 0
+   * @example 22
+   */
+  openRequestsCount: number;
+  /**
+   * Актуальные заявки на вступление со статусом pending, по каждой квартире отдельно
+   * @min 0
+   * @example 12
+   */
+  pendingJoinRequestsCount: number;
+  /**
+   * Пользователи с approved в этом доме, каждый считается один раз
+   * @min 0
+   * @example 286
+   */
+  residentsCount: number;
+  /**
+   * Уже начавшиеся и ещё не завершённые собрания, без отменённых
+   * @min 0
+   * @example 2
+   */
+  activeMeetingsCount: number;
+}
+
+export interface AdminRequestPreviewDto {
+  /** @example 148 */
+  id: number;
+  /** @example "Течёт кровля над пятым подъездом" */
+  title: string;
+  category: RequestCategory;
+  /** submitted: отправлена, in_review: на рассмотрении, in_progress: решается, resolved: ждёт подтверждения, closed: закрыта, cancelled: отменена */
+  status: RequestStatus;
+  /**
+   * @format date-time
+   * @example "2026-09-27T09:12:00.000Z"
+   */
+  createdAt: string;
+}
+
+export interface AdminJoinRequestPreviewDto {
+  /**
+   * ID заявки на вступление
+   * @example 25
+   */
+  id: number;
+  /** @example "112" */
+  apartmentNumber: string;
+  /** @example "Мане Айрапетян" */
+  displayName: string;
+  relationship: ApartmentRelationship;
+  /**
+   * @format date-time
+   * @example "2026-09-27T09:12:00.000Z"
+   */
+  createdAt: string;
+}
+
+export interface AdminHouseAttentionDto {
+  /**
+   * До 5 заявок в УК со статусом submitted, сначала самые старые
+   * @maxItems 5
+   */
+  requests: AdminRequestPreviewDto[];
+  /**
+   * До 5 актуальных заявок на вступление со статусом pending, сначала самые старые
+   * @maxItems 5
+   */
+  joinRequests: AdminJoinRequestPreviewDto[];
+}
+
+export interface AdminHouseOverviewResponseDto {
+  house: HousePreviewDto;
+  stats: AdminHouseStatsDto;
+  attention: AdminHouseAttentionDto;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -753,6 +1427,82 @@ export class Api<
       }),
 
     /**
+     * @description Доступны только при подтверждённом членстве в доме
+     *
+     * @tags Houses
+     * @name GetHouseChats
+     * @summary Получение чатов и каналов дома
+     * @request GET:/api/houses/{houseId}/chats
+     * @secure
+     */
+    getHouseChats: (houseId: number, params: RequestParams = {}) =>
+      this.request<HouseChatsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/chats`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Список событий с пагинацией, включая отменённые. Для upcoming события идут по возрастанию даты начала, для all и past по убыванию. Требуется подтверждённое членство в доме.
+     *
+     * @tags Houses
+     * @name GetHouseEvents
+     * @summary Получение событий дома
+     * @request GET:/api/houses/{houseId}/events
+     * @secure
+     */
+    getHouseEvents: (
+      houseId: number,
+      query?: {
+        /**
+         * Номер страницы
+         * @min 1
+         * @max 1000000
+         * @default 1
+         */
+        page?: number;
+        /**
+         * Количество событий на странице
+         * @min 1
+         * @max 100
+         * @default 20
+         */
+        limit?: number;
+        /** all: все события; upcoming: текущие и будущие; past: завершённые */
+        period?: HouseEventsPeriod;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<HouseEventsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/events`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Информация о доме, контакты, ссылка на оплату и ближайшие события. Требуется подтверждённое членство в доме
+     *
+     * @tags Houses
+     * @name GetHouse
+     * @summary Получение информации о доме
+     * @request GET:/api/houses/{houseId}
+     * @secure
+     */
+    getHouse: (houseId: number, params: RequestParams = {}) =>
+      this.request<HouseDetailsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags Debug
@@ -806,6 +1556,282 @@ export class Api<
         method: "POST",
         body: data,
         type: "application/json",
+        ...params,
+      }),
+
+    /**
+     * @description Доступно подтверждённым собственникам, организаторам, совету дома и админам. Собрание сразу появится в списке, без модерации
+     *
+     * @tags Meetings
+     * @name CreateMeeting
+     * @summary Создание собрания
+     * @request POST:/api/houses/{houseId}/meetings
+     * @secure
+     */
+    createMeeting: (
+      houseId: number,
+      data: CreateMeetingDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<MeetingDetailsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/meetings`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Актуальные идут по дате начала от ближайших, прошедшие по дате окончания от новых. Доступно подтверждённым жителям дома
+     *
+     * @tags Meetings
+     * @name GetHouseMeetings
+     * @summary Получение собраний дома
+     * @request GET:/api/houses/{houseId}/meetings
+     * @secure
+     */
+    getHouseMeetings: (
+      houseId: number,
+      query?: {
+        /** actual: текущие и будущие, past: завершённые и отменённые */
+        period?: MeetingsPeriod;
+        /**
+         * Номер страницы
+         * @min 1
+         * @max 1000000
+         * @default 1
+         */
+        page?: number;
+        /**
+         * Количество собраний на странице
+         * @min 1
+         * @max 100
+         * @default 20
+         */
+        limit?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<MeetingsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/meetings`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Для подтверждённых жителей дома, включая нанимателей. Ответ можно менять до начала очного или очно-заочного собрания
+     *
+     * @tags Meetings
+     * @name UpdateMeetingParticipation
+     * @summary Приду или не приду на собрание
+     * @request PUT:/api/meetings/{meetingId}/participation
+     * @secure
+     */
+    updateMeetingParticipation: (
+      meetingId: number,
+      data: UpdateMeetingParticipationDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<MeetingParticipationResponseDto, ErrorResponseDto>({
+        path: `/api/meetings/${meetingId}/participation`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Предварительное голосование для подтверждённых собственников. Можно ответить на один вопрос или несколько и поменять ответ до окончания. Остальные ответы сохраняются
+     *
+     * @tags Meetings
+     * @name UpdateMeetingVotes
+     * @summary Голосование по вопросам собрания
+     * @request PUT:/api/meetings/{meetingId}/votes
+     * @secure
+     */
+    updateMeetingVotes: (
+      meetingId: number,
+      data: UpdateMeetingVotesDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<MeetingVotesResponseDto, ErrorResponseDto>({
+        path: `/api/meetings/${meetingId}/votes`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Вопросы, результаты и свои голоса
+     *
+     * @tags Meetings
+     * @name GetMeeting
+     * @summary Получение собрания
+     * @request GET:/api/meetings/{meetingId}
+     * @secure
+     */
+    getMeeting: (meetingId: number, params: RequestParams = {}) =>
+      this.request<MeetingDetailsResponseDto, ErrorResponseDto>({
+        path: `/api/meetings/${meetingId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Описание, вложения и история обработки. Личную заявку видят автор и админы дома
+     *
+     * @tags Requests
+     * @name GetRequest
+     * @summary Получение заявки
+     * @request GET:/api/requests/{requestId}
+     * @secure
+     */
+    getRequest: (requestId: number, params: RequestParams = {}) =>
+      this.request<RequestDetailsResponseDto, ErrorResponseDto>({
+        path: `/api/requests/${requestId}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Свои или открытые соседям заявки, новые сверху. Доступно подтверждённым жителям
+     *
+     * @tags Requests
+     * @name GetHouseRequests
+     * @summary Получение заявок дома
+     * @request GET:/api/houses/{houseId}/requests
+     * @secure
+     */
+    getHouseRequests: (
+      houseId: number,
+      query?: {
+        /** mine: свои заявки, house: открытые соседям */
+        scope?: RequestsScope;
+        /** all: все статусы, open: кроме закрытых и отменённых, либо конкретный статус */
+        status?: RequestsStatusFilter;
+        category?: RequestCategory;
+        /**
+         * @min 1
+         * @max 1000000
+         * @default 1
+         */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         * @default 20
+         */
+        limit?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<RequestsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/requests`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Для подтверждённых жителей дома. Файлы сначала загрузите через POST /houses/:houseId/files
+     *
+     * @tags Requests
+     * @name CreateRequest
+     * @summary Создание заявки
+     * @request POST:/api/houses/{houseId}/requests
+     * @secure
+     */
+    createRequest: (
+      houseId: number,
+      data: CreateRequestDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<RequestDetailsResponseDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/requests`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Проверяется доступ к дому и заявке. Для просмотра изображения загрузите его с Authorization и создайте blob URL
+     *
+     * @tags Files
+     * @name GetFile
+     * @summary Получение файла
+     * @request GET:/api/files/{fileId}
+     * @secure
+     */
+    getFile: (fileId: number, params: RequestParams = {}) =>
+      this.request<Blob, ErrorResponseDto>({
+        path: `/api/files/${fileId}`,
+        method: "GET",
+        secure: true,
+        format: "blob",
+        ...params,
+      }),
+
+    /**
+     * @description JPEG, PNG, WebP или PDF до 10 МБ. До привязки к заявке файл доступен только загрузившему его жителю
+     *
+     * @tags Files
+     * @name UploadHouseFile
+     * @summary Загрузка файла для заявки
+     * @request POST:/api/houses/{houseId}/files
+     * @secure
+     */
+    uploadHouseFile: (
+      houseId: number,
+      data: {
+        /** @format binary */
+        file: File;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/files`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: "multipart/form-data",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Счётчики и заявки требующие внимания. Доступно только подтверждённому администратору этого дома
+     *
+     * @tags Admin houses
+     * @name GetAdminHouseOverview
+     * @summary Обзор дома для администратора
+     * @request GET:/api/admin/houses/{houseId}/overview
+     * @secure
+     */
+    getAdminHouseOverview: (houseId: number, params: RequestParams = {}) =>
+      this.request<AdminHouseOverviewResponseDto, ErrorResponseDto>({
+        path: `/api/admin/houses/${houseId}/overview`,
+        method: "GET",
+        secure: true,
+        format: "json",
         ...params,
       }),
   };

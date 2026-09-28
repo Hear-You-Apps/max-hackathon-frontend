@@ -57,12 +57,6 @@ export function Actual() {
       isVote: true,
       vote_data: voteData3,
     },
-    {
-      title: 'Освещение детской площадки',
-      subtitle: 'Очная · холл 2 подъезда · 38 придут',
-      badge: <Badge text={'Очное · 21 сентября, 19:00'} mode={'neutral'} />,
-      children: <div className={'meet-buttons'}>приду не приду пофиг</div>,
-    },
   ];
 
   return (
@@ -81,11 +75,7 @@ export function Actual() {
             after={meet.after}
             bottom={meet.bottom}
           >
-            {meet.isVote ? (
-              <Vote type={meet.vote_data.type} data={meet.vote_data.choices} />
-            ) : (
-              meet.children
-            )}
+            <Vote type={meet.vote_data.type} data={meet.vote_data.choices} />
           </Card>
         );
       })}

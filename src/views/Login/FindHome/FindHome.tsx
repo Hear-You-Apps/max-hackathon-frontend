@@ -30,6 +30,7 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
 
     try {
       const res = await api.searchHouse({ code: inputValue });
+      setLoading(false);
 
       setHome({
         data: res.data.house,
@@ -37,6 +38,7 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
         text: `УК «${res.data.house.managementCompanyName}» · ${res.data.house.apartmentsCount} квартир · ${res.data.house.residentsCount} жителей уже в приложении`,
       });
     } catch (error) {
+      setLoading(false);
       console.error('Search house error:', error);
 
       if (
@@ -60,7 +62,6 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
 
       setError('Не удалось выполнить поиск дома');
     }
-    setLoading(false);
   };
 
   const set = () => {
