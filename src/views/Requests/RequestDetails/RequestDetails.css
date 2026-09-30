@@ -1,0 +1,356 @@
+.request-details-panel {
+  --vkui_internal--panel_header_height: 56px;
+}
+
+.request-header-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.request-header-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.page-content.request-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #060708;
+  overflow-wrap: anywhere;
+}
+
+.request-info .card {
+  align-items: stretch;
+  gap: 8px;
+}
+
+.request-info .card-top {
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.request-info .card-after {
+  margin-left: auto;
+}
+
+.request-info .card-title {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.request-info .card-subtitle,
+.request-details-caption {
+  color: rgba(6, 7, 8, 0.52);
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+}
+
+.request-info .card-bottom:empty {
+  display: none;
+}
+
+.request-description {
+  font-size: 16px;
+  line-height: 20px;
+  white-space: pre-wrap;
+}
+
+.request-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.request-file {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 96px;
+  height: 96px;
+  padding: 8px;
+  border: 0;
+  border-radius: 12px;
+  background: #f5f7fa;
+  color: rgba(6, 7, 8, 0.52);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.request-file:disabled {
+  cursor: default;
+}
+
+.request-file > img {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.request-file > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+}
+
+.request-timeline {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.request-timeline-title,
+.request-timeline-label {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.request-timeline-title {
+  margin-bottom: 12px;
+}
+
+.request-timeline-event {
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.request-timeline-event:last-child {
+  padding-bottom: 0;
+}
+
+.request-timeline-event:not(:last-child)::before {
+  position: absolute;
+  top: 12px;
+  bottom: -12px;
+  left: 11px;
+  width: 2px;
+  background: #dedede;
+  content: '';
+}
+
+.request-timeline-event.done:not(:last-child)::before {
+  background: #1abe43;
+}
+
+.request-timeline-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #b0b0b3;
+}
+
+.request-timeline-marker:empty::after {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  content: '';
+}
+
+.request-timeline-marker > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.request-timeline-marker path {
+  fill: #fff;
+}
+
+.request-timeline-event.done .request-timeline-marker {
+  background: #1abe43;
+}
+
+.request-timeline-event.current .request-timeline-marker {
+  background: #007aff;
+}
+
+.request-timeline-event.cancelled .request-timeline-marker {
+  background: #ff303c;
+}
+
+.request-timeline-body {
+  margin-left: 36px;
+  min-width: 0;
+}
+
+.request-timeline-date {
+  color: rgba(6, 7, 8, 0.68);
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+  white-space: pre-wrap;
+}
+
+.request-timeline-comment {
+  margin: 12px 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(0, 122, 255, 0.12);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: pre-wrap;
+}
+
+.request-timeline-event.pending {
+  color: rgba(6, 7, 8, 0.52);
+}
+
+.request-timeline-event.pending::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 1px;
+  background: #f5f5f5;
+  content: '';
+}
+
+.request-timeline-event:has(+ .pending)::before {
+  bottom: 0;
+}
+
+.request-details-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.request-details-actions > button {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 8px;
+  gap: 6px;
+  border-radius: 12px;
+  font-size: clamp(13px, 4vw, 16px);
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.request-details-actions > .secondary {
+  background: rgba(9, 9, 9, 0.06);
+}
+
+.request-details-actions svg {
+  flex-shrink: 0;
+}
+
+.request-details button:disabled {
+  cursor: default;
+}
+
+.request-details-spinner {
+  padding: 24px;
+}
+
+.request-file-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  background: #141414;
+  color: #fff;
+}
+
+.request-file-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+}
+
+.request-file-preview-header > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.request-file-preview-header > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.request-file-preview-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.request-file-preview-content > img {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+}
+
+.request-file-document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  padding: 24px;
+  font-size: 17px;
+  line-height: 24px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.request-file-document > span {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.request-file-download {
+  align-self: center;
+  padding: 16px;
+  color: #fff;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+@media (max-width: 360px) {
+  .request-details-actions svg {
+    width: 20px;
+    height: 20px;
+  }
+}

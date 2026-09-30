@@ -2,16 +2,17 @@ import { Panel as MaxPanel } from '@maxhub/max-ui';
 import { Snackbar } from '@vkontakte/vkui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { MyHouseDto, RequestsScope } from 'src/api/api';
+import type { MyHouseDto } from 'src/api/api';
 import { IconRequestsAdd } from 'src/assets/icons';
 import { Button } from 'src/components';
 import { paths } from 'src/navigation/routes';
+import { useRequestsStore } from 'src/storage';
 import { RequestsItems } from './RequestsItems';
 
 export function RequestsList({ house }: { house: MyHouseDto }) {
   const navigate = useNavigate();
-  const [scope, setScope] = useState<RequestsScope>('mine');
-  const [status, setStatus] = useState<'all' | 'open' | 'completed'>('all');
+  const { filters, setFilters } = useRequestsStore();
+  const { scope = 'mine', status = 'all' } = filters[house.id] ?? {};
   const [notice, setNotice] = useState('');
 
   return (
@@ -31,7 +32,7 @@ export function RequestsList({ house }: { house: MyHouseDto }) {
             key={value}
             type="button"
             className={`requests-filter ${scope === value ? 'selected' : ''}`}
-            onClick={() => setScope(value)}
+            onClick={() => setFilters(house.id, { scope: value, status })}
           >
             {label}
           </button>
@@ -39,14 +40,18 @@ export function RequestsList({ house }: { house: MyHouseDto }) {
         <button
           type="button"
           className={`requests-filter ${status === 'open' ? 'selected' : ''}`}
-          onClick={() => setStatus(status === 'open' ? 'all' : 'open')}
+          onClick={() =>
+            setFilters(house.id, { scope, status: status === 'open' ? 'all' : 'open' })
+          }
         >
           Открытые
         </button>
         <button
           type="button"
           className={`requests-filter ${status === 'completed' ? 'selected' : ''}`}
-          onClick={() => setStatus(status === 'completed' ? 'all' : 'completed')}
+          onClick={() =>
+            setFilters(house.id, { scope, status: status === 'completed' ? 'all' : 'completed' })
+          }
         >
           Решённые
         </button>
@@ -57,7 +62,7 @@ export function RequestsList({ house }: { house: MyHouseDto }) {
         house={house}
         scope={scope}
         status={status}
-        onUnavailableAction={() => {}}
+        onUnavailableAction={() => setNotice('Подтверждение решения пока недоступно')}
       />
 
       {notice && (

@@ -32,4 +32,5 @@ export {
   Icon24Cancel as IconClose,
   Icon24Add as IconAddOutline,
   Icon24PlaceOutline as IconLocationOutline,
+  Icon24UsersOutline as IconPeopleOutline,
 } from '@vkontakte/icons';

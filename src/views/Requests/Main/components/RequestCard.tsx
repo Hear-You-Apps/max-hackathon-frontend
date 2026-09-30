@@ -1,20 +1,10 @@
-import type { ComponentProps } from 'react';
-import type { RequestCategory, RequestDto, RequestStatus } from 'src/api/api';
+import { generatePath, useNavigate } from 'react-router-dom';
+import type { RequestCategory, RequestDto } from 'src/api/api';
 import { IconRequestsDone, IconRequestsNeighbors } from 'src/assets/icons';
 import { Badge, Button, Card } from 'src/components';
 import declOfNum from 'src/functions/declOfNum';
-
-const statuses: Record<
-  RequestStatus,
-  { text: string; mode: ComponentProps<typeof Badge>['mode'] }
-> = {
-  submitted: { text: 'Отправлена', mode: 'neutral' },
-  in_review: { text: 'На рассмотрении', mode: 'yellow' },
-  in_progress: { text: 'Решается', mode: 'primary' },
-  resolved: { text: 'Решено · ждёт подтверждения', mode: 'positive' },
-  closed: { text: 'Решено', mode: 'positive' },
-  cancelled: { text: 'Отменена', mode: 'negative' },
-};
+import { paths } from 'src/navigation/routes';
+import { requestStatuses } from '../../constants';
 
 const categories: Record<RequestCategory, string> = {
   management: 'УК',
@@ -52,7 +42,8 @@ export function RequestCard({
   managementCompanyName: string | null;
   onUnavailableAction: () => void;
 }) {
-  const status = statuses[request.status];
+  const navigate = useNavigate();
+  const status = requestStatuses[request.status];
   const company = managementCompanyName ? `УК «${managementCompanyName}»` : '';
   const subtitle = [
     request.category === 'management' && company ? '' : categories[request.category],
@@ -63,6 +54,7 @@ export function RequestCard({
 
   return (
     <Card
+      onClick={() => navigate(generatePath(paths.request, { requestId: request.id }))}
       title={request.title}
       subtitle={subtitle}
       badge={<Badge mode={status.mode} text={status.text} />}
@@ -73,7 +65,7 @@ export function RequestCard({
       }
       bottom={
         request.status === 'resolved' && request.isMine ? (
-          <div className="request-actions">
+          <div className="request-actions" onClick={(event) => event.stopPropagation()}>
             <Button mode="themed" onClick={onUnavailableAction}>
               <IconRequestsDone /> Подтвердить
             </Button>
