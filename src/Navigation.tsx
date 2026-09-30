@@ -3,8 +3,7 @@ import { Epic, Tabbar, TabbarItem, View } from '@vkontakte/vkui';
 import { Navigate, matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { paths, routes } from './navigation/routes';
 import { Meets, MeetView } from 'src/views/Meets';
-import { Requests } from './views/Requests/Requests';
-import { ProfileDetails } from './views/Requests/Details';
+import { Requests, NewRequest, RequestDetails } from 'src/views/Requests';
 
 import {
   Icon24Meets,
@@ -69,7 +68,7 @@ export function Navigation() {
     <Epic
       activeStory={hasHouses ? route.view : 'login'}
       tabbar={
-        hasHouses ? (
+        hasHouses && route.path !== paths.newRequest ? (
           <Tabbar className="app-tabbar" aria-label="Вкладки">
             {hasAdminAccess ? (
               <TabbarItem
@@ -154,7 +153,8 @@ export function Navigation() {
         onSwipeBack={goBack}
       >
         <Requests id="requests-main" />
-        <ProfileDetails id="profile-details" onBack={goBack} />
+        <NewRequest id="requests-new" />
+        <RequestDetails id="request" />
       </View>
       <View
         id="home"

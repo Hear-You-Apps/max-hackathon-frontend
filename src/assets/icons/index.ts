@@ -26,3 +26,10 @@ export { default as IconRequestsHome } from './requests/home.svg?react';
 export { default as IconRequestsAdd } from './requests/add.svg?react';
 export { default as IconRequestsDone } from './requests/done.svg?react';
 export { default as IconRequestsNeighbors } from './requests/neighbors.svg?react';
+export {
+  Icon24CameraOutline as IconCamera,
+  Icon24DocumentOutline as IconDocument,
+  Icon24Cancel as IconClose,
+  Icon24Add as IconAddOutline,
+  Icon24PlaceOutline as IconLocationOutline,
+} from '@vkontakte/icons';

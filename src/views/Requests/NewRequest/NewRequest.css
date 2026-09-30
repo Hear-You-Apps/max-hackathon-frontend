@@ -1,0 +1,243 @@
+.new-request-panel {
+  --vkui_internal--panel_header_height: 56px;
+}
+
+.new-request-panel .vkuiPanel__in {
+  min-height: 100dvh;
+}
+
+.new-request-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.new-request-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #060708;
+  cursor: pointer;
+}
+
+.page-content.new-request {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.new-request-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.new-request-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.new-request-field > span,
+.new-request .input > .input-label,
+.new-request-hint {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+  color: rgba(6, 7, 8, 0.52);
+}
+
+.new-request textarea {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #060708;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.new-request textarea {
+  display: block;
+  min-height: 96px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  resize: none;
+  background: #f5f7fa;
+}
+
+.new-request textarea::placeholder {
+  color: rgba(6, 7, 8, 0.48);
+}
+
+.new-request-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.new-request-location {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(9, 9, 9, 0.05);
+  color: #060708;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.new-request-location > :first-child {
+  flex-shrink: 0;
+  color: rgba(6, 7, 8, 0.52);
+}
+
+.request-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.request-attachment {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: 12px;
+  background: #f5f7fa;
+  color: rgba(6, 7, 8, 0.28);
+}
+
+.request-attachment > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(6, 7, 8, 0.52);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.3px;
+}
+
+.request-camera {
+  background: rgba(0, 122, 255, 0.12);
+  color: #007aff;
+}
+
+.request-camera > span {
+  color: inherit;
+}
+
+.request-attachment-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.request-attachment-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #060708;
+}
+
+.request-attachments > button:not(:disabled),
+.request-attachment-remove:not(:disabled) {
+  cursor: pointer;
+}
+
+.new-request-visibility {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.new-request-visibility > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.new-request-visibility > div > :first-child {
+  color: #060708;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.new-request-visibility > div > :last-child {
+  color: rgba(6, 7, 8, 0.68);
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+}
+
+.new-request .primary-button {
+  font-size: 17px;
+  line-height: 20px;
+  letter-spacing: 0.15px;
+}
+
+.new-request-error {
+  color: #ff303c;
+  font-size: 13px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+
+.new-request button:disabled,
+.new-request-close:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.new-request button:focus-visible,
+.new-request-close:focus-visible {
+  outline: 2px solid #007aff;
+  outline-offset: -2px;
+}
+
+@media (max-width: 360px) {
+  .request-attachment {
+    width: 88px;
+    height: 88px;
+  }
+}

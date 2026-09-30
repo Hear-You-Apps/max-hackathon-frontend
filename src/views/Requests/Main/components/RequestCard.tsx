@@ -68,8 +68,7 @@ export function RequestCard({
       badge={<Badge mode={status.mode} text={status.text} />}
       after={
         <span className="request-date">
-          № {request.number} ·{' '}
-          <time dateTime={request.createdAt}>{formatDate(request.createdAt)}</time>
+          № {request.number} · {formatDate(request.createdAt)}
         </span>
       }
       bottom={

@@ -56,7 +56,7 @@ export function RequestsItems({
   }, [house.id, scope, status, page, attempt]);
 
   return (
-    <div className="requests-list" aria-label="Список заявок" aria-busy={loading}>
+    <div className="requests-list">
       {result?.items.map((request) => (
         <RequestCard
           key={request.id}
@@ -66,10 +66,10 @@ export function RequestsItems({
         />
       ))}
 
-      {loading && <Spinner className="requests-spinner" size="l" aria-label="Загрузка заявок" />}
+      {loading && <Spinner className="requests-spinner" size="l" />}
 
       {error && (
-        <div className="requests-state" role="alert">
+        <div className="requests-state">
           <span>Не удалось загрузить заявки</span>
           <Button
             mode="themed"
@@ -84,7 +84,7 @@ export function RequestsItems({
       )}
 
       {!loading && !error && result?.items.length === 0 && (
-        <div className="requests-state" role="status">
+        <div className="requests-state">
           {status === 'open'
             ? 'Открытых заявок пока нет'
             : status === 'completed'
