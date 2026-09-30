@@ -6,7 +6,15 @@ import { Meets, MeetView } from 'src/views/Meets';
 import { Requests } from './views/Requests/Requests';
 import { ProfileDetails } from './views/Requests/Details';
 
-import { Icon24Meets, Icon24Requests, Icon24Manage, IconHome } from './assets/icons';
+import {
+  Icon24Meets,
+  Icon24Requests,
+  Icon24Manage,
+  IconHome,
+  IconRequestsMeets,
+  IconRequestsActive,
+  IconRequestsHome,
+} from 'src/assets/icons';
 import { useUserStore } from 'src/storage';
 import { FindHome, Login, SetHome } from 'src/views/Login';
 import { api } from 'src/api/client';
@@ -53,7 +61,7 @@ export function Navigation() {
   }
 
   const meetsPanel = route.view === 'meets' ? route.panel : 'meets-main';
-  const requestsPanel = route.view === 'requests' ? route.panel : 'requests-user';
+  const requestsPanel = route.view === 'requests' ? route.panel : 'requests-main';
   const homeInfoPanel = route.view === 'home' ? route.panel : 'home-info';
   const loginPanel = route.view === 'login' ? route.panel : 'login-main';
 
@@ -79,23 +87,33 @@ export function Navigation() {
               label="Собрания"
               onClick={() => navigate(paths.meets, { replace: true })}
             >
-              <Icon24Meets className={`icon-meets ${route.view === 'meets' ? 'active' : ''}`} />
+              {route.view === 'requests' ? (
+                <IconRequestsMeets />
+              ) : (
+                <Icon24Meets className={`icon-meets ${route.view === 'meets' ? 'active' : ''}`} />
+              )}
             </TabbarItem>
             <TabbarItem
               selected={route.view === 'requests'}
               label="Заявки"
               onClick={() => navigate(paths.requests, { replace: true })}
             >
-              <Icon24Requests
-                className={`icon-requests ${route.view === 'requests' ? 'active' : ''}`}
-              />
+              {route.view === 'requests' ? (
+                <IconRequestsActive />
+              ) : (
+                <Icon24Requests className="icon-requests" />
+              )}
             </TabbarItem>
             <TabbarItem
               selected={route.view === 'home'}
-              label="Дом"
+              label={route.view === 'requests' ? 'Мой дом' : 'Дом'}
               onClick={() => navigate(paths.homeInfo, { replace: true })}
             >
-              <IconHome className={`icon-home ${route.view === 'home' ? 'active' : ''}`} />
+              {route.view === 'requests' ? (
+                <IconRequestsHome />
+              ) : (
+                <IconHome className={`icon-home ${route.view === 'home' ? 'active' : ''}`} />
+              )}
             </TabbarItem>
           </Tabbar>
         ) : null
@@ -131,9 +149,7 @@ export function Navigation() {
         id="requests"
         activePanel={requestsPanel}
         history={
-          requestsPanel === 'requests-user'
-            ? ['requests-user']
-            : ['requests-user', 'profile-details']
+          requestsPanel === 'requests-main' ? ['requests-main'] : ['requests-main', requestsPanel]
         }
         onSwipeBack={goBack}
       >

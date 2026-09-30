@@ -13,6 +13,7 @@
 export type RequestsStatusFilter =
   | "all"
   | "open"
+  | "completed"
   | "submitted"
   | "in_review"
   | "in_progress"
@@ -21,15 +22,6 @@ export type RequestsStatusFilter =
   | "cancelled";
 
 export type RequestsScope = "mine" | "house";
-
-/** submitted: отправлена, in_review: на рассмотрении, in_progress: решается, resolved: ждёт подтверждения, closed: закрыта, cancelled: отменена */
-export type RequestStatus =
-  | "submitted"
-  | "in_review"
-  | "in_progress"
-  | "resolved"
-  | "closed"
-  | "cancelled";
 
 export type RequestVisibility = "private" | "house";
 
@@ -50,6 +42,14 @@ export type VotingAudience = "all_residents" | "owners";
 
 /** in_person: очная, absentee: заочная, mixed: очно-заочная */
 export type MeetingFormat = "in_person" | "absentee" | "mixed";
+
+export type RequestStatus =
+  | "submitted"
+  | "in_review"
+  | "in_progress"
+  | "resolved"
+  | "closed"
+  | "cancelled";
 
 export type HouseContactType =
   | "dispatcher"
@@ -120,6 +120,7 @@ export type ErrorCode =
   | "POLL_VOTE_FORBIDDEN"
   | "POLL_VOTING_UNAVAILABLE"
   | "REQUEST_NOT_AVAILABLE"
+  | "REQUEST_SUBSCRIPTION_FORBIDDEN"
   | "INVALID_REQUEST_LOCATION"
   | "REQUEST_APARTMENT_NOT_AVAILABLE"
   | "REQUEST_ATTACHMENTS_NOT_AVAILABLE"
@@ -497,6 +498,17 @@ export interface RejectJoinRequestDto {
    * @example "Неверно указан номер квартиры"
    */
   reason: string;
+}
+
+export interface UpdateRequestStatusDto {
+  /**
+   * @format uuid
+   * @example "abf319d9-b173-4aeb-b9bb-7ca6e15e6df8"
+   */
+  requestId: string;
+  status: RequestStatus;
+  /** @example "Бригада выедет завтра" */
+  comment?: string | null;
 }
 
 export interface CreateMeetingQuestionDto {
@@ -894,8 +906,11 @@ export interface RequestApartmentDto {
 }
 
 export interface FileDto {
-  /** @example 1 */
-  id: number;
+  /**
+   * @format uuid
+   * @example "d4af5a13-abf9-48f2-8d09-dc62b0297139"
+   */
+  id: string;
   /**
    * Исходное имя файла
    * @example "photo.jpg"
@@ -910,7 +925,7 @@ export interface FileDto {
   size: number;
   /**
    * Скачать по урл
-   * @example "/api/files/1"
+   * @example "/api/files/d4af5a13-abf9-48f2-8d09-dc62b0297139"
    */
   url: string;
 }
@@ -929,8 +944,16 @@ export interface RequestEventDto {
 }
 
 export interface RequestDetailsResponseDto {
-  /** @example 148 */
-  id: number;
+  /**
+   * @format uuid
+   * @example "abf319d9-b173-4aeb-b9bb-7ca6e15e6df8"
+   */
+  id: string;
+  /**
+   * Номер заявки для отображения
+   * @example 148
+   */
+  number: number;
   /** @example 1 */
   houseId: number;
   /** @example "Течёт кровля над пятым подъездом" */
@@ -952,6 +975,16 @@ export interface RequestDetailsResponseDto {
    * @example true
    */
   isMine: boolean;
+  /**
+   * Сколько жителей подписано
+   * @example 12
+   */
+  subscribersCount: number;
+  /**
+   * Вы подписаны на эту заявку
+   * @example false
+   */
+  isSubscribed: boolean;
   /** @example "После дождя вода течёт по стене у лифта" */
   description: string;
   /** @example "Пятый подъезд, девятый этаж" */
@@ -965,8 +998,16 @@ export interface RequestDetailsResponseDto {
 }
 
 export interface RequestDto {
-  /** @example 148 */
-  id: number;
+  /**
+   * @format uuid
+   * @example "abf319d9-b173-4aeb-b9bb-7ca6e15e6df8"
+   */
+  id: string;
+  /**
+   * Номер заявки для отображения
+   * @example 148
+   */
+  number: number;
   /** @example 1 */
   houseId: number;
   /** @example "Течёт кровля над пятым подъездом" */
@@ -988,6 +1029,11 @@ export interface RequestDto {
    * @example true
    */
   isMine: boolean;
+  /**
+   * Сколько жителей подписано
+   * @example 12
+   */
+  subscribersCount: number;
 }
 
 export interface RequestsResponseDto {
@@ -1031,7 +1077,7 @@ export interface CreateRequestDto {
    */
   locationText?: string | null;
   /**
-   * private: только автор и админы, house: видно соседям
+   * private: только по ссылке, house: в списке дома. По ссылке могут открыть подтверждённые жители
    * @default "private"
    */
   visibility?: RequestVisibility;
@@ -1041,7 +1087,7 @@ export interface CreateRequestDto {
    * @uniqueItems true
    * @default []
    */
-  attachmentIds?: number[];
+  attachmentIds?: string[];
 }
 
 export interface AdminHouseStatsDto {
@@ -1078,8 +1124,16 @@ export interface AdminHouseStatsDto {
 }
 
 export interface AdminRequestPreviewDto {
-  /** @example 148 */
-  id: number;
+  /**
+   * @format uuid
+   * @example "abf319d9-b173-4aeb-b9bb-7ca6e15e6df8"
+   */
+  id: string;
+  /**
+   * Номер заявки для отображения
+   * @example 148
+   */
+  number: number;
   /** @example "Течёт кровля над пятым подъездом" */
   title: string;
   category: RequestCategory;
@@ -1732,6 +1786,26 @@ export class Api<
       }),
 
     /**
+     * No description
+     *
+     * @tags Debug
+     * @name DebugUpdateRequestStatus
+     * @summary Изменить статус заявки
+     * @request POST:/api/debug/requests/status
+     */
+    debugUpdateRequestStatus: (
+      data: UpdateRequestStatusDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/debug/requests/status`,
+        method: "POST",
+        body: data,
+        type: "application/json",
+        ...params,
+      }),
+
+    /**
      * @description Можно передать один question со сроком или полную повестку. Доступно собственникам, организаторам, совету дома и админам
      *
      * @tags Meetings
@@ -1918,7 +1992,7 @@ export class Api<
       }),
 
     /**
-     * @description Описание, вложения и история обработки. Личную заявку видят автор и админы дома
+     * @description Описание, вложения и история обработки. По ссылке заявку видят подтверждённые жители дома
      *
      * @tags Requests
      * @name GetRequest
@@ -1926,12 +2000,46 @@ export class Api<
      * @request GET:/api/requests/{requestId}
      * @secure
      */
-    getRequest: (requestId: number, params: RequestParams = {}) =>
+    getRequest: (requestId: string, params: RequestParams = {}) =>
       this.request<RequestDetailsResponseDto, ErrorResponseDto>({
         path: `/api/requests/${requestId}`,
         method: "GET",
         secure: true,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Для жителей этого дома, кроме автора заявки
+     *
+     * @tags Requests
+     * @name SubscribeToRequest
+     * @summary Подписаться на заявку
+     * @request PUT:/api/requests/{requestId}/subscription
+     * @secure
+     */
+    subscribeToRequest: (requestId: string, params: RequestParams = {}) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/requests/${requestId}/subscription`,
+        method: "PUT",
+        secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Requests
+     * @name UnsubscribeFromRequest
+     * @summary Отписаться от заявки
+     * @request DELETE:/api/requests/{requestId}/subscription
+     * @secure
+     */
+    unsubscribeFromRequest: (requestId: string, params: RequestParams = {}) =>
+      this.request<void, ErrorResponseDto>({
+        path: `/api/requests/${requestId}/subscription`,
+        method: "DELETE",
+        secure: true,
         ...params,
       }),
 
@@ -1949,7 +2057,7 @@ export class Api<
       query?: {
         /** mine: свои заявки, house: открытые соседям */
         scope?: RequestsScope;
-        /** all: все статусы, open: кроме закрытых и отменённых, либо конкретный статус */
+        /** all: все статусы, open: кроме закрытых и отменённых, completed: ждут подтверждения или закрыты, либо конкретный статус */
         status?: RequestsStatusFilter;
         category?: RequestCategory;
         /**
@@ -2009,7 +2117,7 @@ export class Api<
      * @request GET:/api/files/{fileId}
      * @secure
      */
-    getFile: (fileId: number, params: RequestParams = {}) =>
+    getFile: (fileId: string, params: RequestParams = {}) =>
       this.request<Blob, ErrorResponseDto>({
         path: `/api/files/${fileId}`,
         method: "GET",

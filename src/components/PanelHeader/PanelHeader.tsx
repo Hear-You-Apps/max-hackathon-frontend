@@ -15,11 +15,15 @@ export function Header({
   isBack,
   children,
   after,
+  subtitle,
+  separator = true,
   isHome = false,
 }: {
   isBack?: boolean;
   children?: React.ReactNode;
   after?: React.ReactNode | 'notifications';
+  subtitle?: string;
+  separator?: boolean;
   isHome?: boolean;
 }) {
   const { user, setUser } = useUserStore();
@@ -43,6 +47,7 @@ export function Header({
   return (
     <PanelHeader
       className={'header'}
+      delimiter={separator ? 'auto' : 'none'}
       before={
         isBack ? (
           <div className={'back-button'} onClick={() => navigate(-1)}>
@@ -70,8 +75,8 @@ export function Header({
         <div className={'home-header'}>
           <div>{house?.address}</div>
           <div>
-            {declOfNum(house?.apartmentsCount ?? 0, ['квартира', 'квартиры', 'квартир'])} ·{' '}
-            {house?.residentsCount ?? 0} в приложении
+            {subtitle ??
+              `${declOfNum(house?.apartmentsCount ?? 0, ['квартира', 'квартиры', 'квартир'])} · ${house?.residentsCount ?? 0} в приложении`}
           </div>
         </div>
       ) : (
