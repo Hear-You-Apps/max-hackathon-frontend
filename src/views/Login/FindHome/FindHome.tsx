@@ -163,7 +163,7 @@ export function FindHome({ id }: { id: string }) {
           </div>
         ) : null}
 
-        {!error && home ? (
+        {!error.hasError && home ? (
           <>
             <div className={'found-home'}>
               <div className={'badge'}>Дом найден</div>
