@@ -45,9 +45,6 @@ export function Navigation() {
       return;
     }
 
-    // @TODO: DELETE 30 SEPTEMBER
-    console.log(window.WebApp?.initData);
-
     api
       .init()
       .then(({ data }) => console.log('init:', data))
