@@ -13,6 +13,7 @@ import { useUserStore } from 'src/storage';
 import { RequestInfo } from './RequestInfo';
 import { RequestTimeline } from './RequestTimeline';
 import { RequestFilePreview } from './RequestFilePreview';
+import { RequestDebug } from './RequestDebug';
 
 export function RequestContent({ requestId }: { requestId: string }) {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export function RequestContent({ requestId }: { requestId: string }) {
   const [unavailable, setUnavailable] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [subscribing, setSubscribing] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [notice, setNotice] = useState('');
   const [preview, setPreview] = useState<{ file: FileDto; url: string }>();
   const subscription = useRef<AbortController | null>(null);
@@ -62,7 +64,7 @@ export function RequestContent({ requestId }: { requestId: string }) {
   useEffect(() => () => subscription.current?.abort(), []);
 
   const toggleSubscription = async () => {
-    if (!request || request.isMine || subscription.current) return;
+    if (!request || request.isMine || subscription.current || updatingStatus) return;
     const controller = new AbortController();
     subscription.current = controller;
     setSubscribing(true);
@@ -153,7 +155,11 @@ export function RequestContent({ requestId }: { requestId: string }) {
             <RequestTimeline events={request.events} status={request.status} />
             <div className="request-details-actions">
               {!request.isMine && (
-                <Button mode="themed" disabled={subscribing} onClick={toggleSubscription}>
+                <Button
+                  mode="themed"
+                  disabled={subscribing || updatingStatus}
+                  onClick={toggleSubscription}
+                >
                   <IconPeopleOutline />
                   {subscribing
                     ? 'Подождите…'
@@ -172,6 +178,12 @@ export function RequestContent({ requestId }: { requestId: string }) {
                 ? `Уже ${joined} ${declOfNum(subscribersCount, ['житель', 'жителя', 'жителей'])}.`
                 : 'Пока никто не присоединился.'}
             </div>
+            <RequestDebug
+              request={request}
+              disabled={subscribing}
+              onUpdated={setRequest}
+              onBusyChange={setUpdatingStatus}
+            />
           </>
         )}
       </MaxPanel>
