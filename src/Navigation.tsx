@@ -1,9 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import { Epic, Tabbar, TabbarItem, View } from '@vkontakte/vkui';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, matchPath, useLocation, useNavigate } from 'react-router-dom';
 import { paths, routes } from './navigation/routes';
-import { Meets } from 'src/views/Meets';
-import { HomeDetails } from './views/Meets/Details';
+import { Meets, MeetView } from 'src/views/Meets';
 import { Requests } from './views/Requests/Requests';
 import { ProfileDetails } from './views/Requests/Details';
 
@@ -18,7 +17,7 @@ export function Navigation() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const route = routes.find(({ path }) => path === location.pathname);
+  const route = routes.find(({ path }) => matchPath(path, location.pathname));
   const hasHouses = userInfo.houses.length > 0;
   const hasJoinRequests = userInfo.joinRequests?.length > 0;
   const main = hasHouses ? paths.meets : hasJoinRequests ? paths.setHome : paths.login;
@@ -49,6 +48,9 @@ export function Navigation() {
   }, []);
 
   if (!route) return <Navigate to={main} replace />;
+  if (!hasHouses && route.view !== 'login') {
+    return <Navigate to={main} replace />;
+  }
 
   const meetsPanel = route.view === 'meets' ? route.panel : 'meets-main';
   const requestsPanel = route.view === 'requests' ? route.panel : 'requests-user';
@@ -112,18 +114,18 @@ export function Navigation() {
         }
       >
         <Login id={'login-main'} />
-        <FindHome id={'login-find'} onBack={goBack} />
-        <SetHome id={'set-home'} onBack={goBack} requests={hasJoinRequests} />
+        <FindHome id={'login-find'} />
+        <SetHome id={'set-home'} requests={hasJoinRequests} />
       </View>
 
       <View
         id="meets"
         activePanel={meetsPanel}
-        history={meetsPanel === 'meets-main' ? ['meets-main'] : ['meets-main', 'home-details']}
+        history={meetsPanel === 'meets-main' ? ['meets-main'] : ['meets-main', 'meet']}
         onSwipeBack={goBack}
       >
         <Meets id="meets-main" />
-        <HomeDetails id="home-details" onBack={goBack} />
+        <MeetView id="meet" />
       </View>
       <View
         id="requests"

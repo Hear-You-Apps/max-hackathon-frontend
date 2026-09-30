@@ -1,1 +1,1 @@
-export * from './selectedHome';
+export { default as useSelectedHouseStore } from './selectedHome';

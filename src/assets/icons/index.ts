@@ -15,3 +15,8 @@ export { default as IconLocation } from './location.svg?react';
 export { default as IconSetting } from './setting.svg?react';
 export { default as IconClock } from './clock.svg?react';
 export { default as IconInfo } from './info-circle.svg?react';
+export { default as IconCancel } from './cancel_circle_outline.svg?react';
+export { default as IconInfoOutline } from './info_circle_outline.svg?react';
+export { default as IconShare } from './share_outline.svg?react';
+export { default as IconNotificationsOff } from './notification_off.svg?react';
+export { default as IconDone } from './done.svg?react';

@@ -9,6 +9,7 @@ export const ATOM_USER_DEFAULT_DATA: InitResponseDto = {
     lastName: '',
     username: '',
     photoUrl: '',
+    notificationsEnabled: false,
   },
   /*houses: [
     {

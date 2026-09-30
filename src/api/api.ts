@@ -45,6 +45,9 @@ export type MeetingVoteChoice = "yes" | "no" | "abstain";
 /** scheduled: ещё не началось, active: идёт, closed: завершено, cancelled: отменено */
 export type MeetingStatus = "scheduled" | "active" | "closed" | "cancelled";
 
+/** all_residents: все жители, owners: только собственники */
+export type VotingAudience = "all_residents" | "owners";
+
 /** in_person: очная, absentee: заочная, mixed: очно-заочная */
 export type MeetingFormat = "in_person" | "absentee" | "mixed";
 
@@ -106,16 +109,25 @@ export type ErrorCode =
   | "MEETING_CREATE_FORBIDDEN"
   | "INVALID_MEETING_DATES"
   | "MEETING_LOCATION_REQUIRED"
+  | "MEETING_APARTMENTS_COUNT_REQUIRED"
   | "MEETING_VOTE_FORBIDDEN"
   | "MEETING_VOTING_UNAVAILABLE"
   | "INVALID_MEETING_QUESTIONS"
   | "MEETING_PARTICIPATION_UNAVAILABLE"
+  | "INVALID_POLL_DATE"
+  | "INVALID_POLL_OPTIONS"
+  | "POLL_NOT_AVAILABLE"
+  | "POLL_VOTE_FORBIDDEN"
+  | "POLL_VOTING_UNAVAILABLE"
   | "REQUEST_NOT_AVAILABLE"
   | "INVALID_REQUEST_LOCATION"
   | "REQUEST_APARTMENT_NOT_AVAILABLE"
   | "REQUEST_ATTACHMENTS_NOT_AVAILABLE"
   | "FILE_NOT_AVAILABLE"
-  | "INVALID_FILE";
+  | "INVALID_FILE"
+  | "BOT_WEBHOOK_UNAUTHORIZED"
+  | "BOT_WEBHOOK_NOT_CONFIGURED"
+  | "BOT_MESSAGE_FAILED";
 
 export interface HealthResponseDto {
   /** @example "ok" */
@@ -157,13 +169,6 @@ export interface MyApartmentDto {
   verificationStatus: ApartmentVerificationStatus;
 }
 
-export interface HouseNotificationsDto {
-  /** @example true */
-  meetings: boolean;
-  /** @example true */
-  requests: boolean;
-}
-
 export interface MyHouseMembershipDto {
   /** @example 1 */
   id: number;
@@ -174,12 +179,9 @@ export interface MyHouseMembershipDto {
   displayName: string;
   roles: HouseRole[];
   apartments: MyApartmentDto[];
-  notifications: HouseNotificationsDto;
 }
 
 export interface MyHouseDto {
-  code: string;
-  residentsCount: number;
   /** @example 10 */
   id: number;
   /** @example "ул. Ленина, 24" */
@@ -190,6 +192,12 @@ export interface MyHouseDto {
   apartmentsCount: number | null;
   /** @example 6 */
   entrancesCount: number | null;
+  /**
+   * Количество подтверждённых жителей дома
+   * @min 0
+   * @example 286
+   */
+  residentsCount: number;
   /** Ссылка для связи с администратором дома. Доступна при подтверждённом членстве. */
   adminContactUrl: string | null;
   membership: MyHouseMembershipDto;
@@ -206,6 +214,12 @@ export interface HousePreviewDto {
   apartmentsCount: number | null;
   /** @example 6 */
   entrancesCount: number | null;
+  /**
+   * Количество подтверждённых жителей дома
+   * @min 0
+   * @example 286
+   */
+  residentsCount: number;
 }
 
 export interface MyHouseJoinRequestDto {
@@ -220,7 +234,6 @@ export interface MyHouseJoinRequestDto {
   status: HouseJoinRequestStatus;
   /** @example null */
   rejectionReason: string | null;
-  notifications: HouseNotificationsDto;
 }
 
 export interface UserProfileDto {
@@ -234,6 +247,8 @@ export interface UserProfileDto {
   username: string | null;
   /** @example null */
   photoUrl: string | null;
+  /** Уведомления о собраниях и заявках во всех домах */
+  notificationsEnabled: boolean;
 }
 
 export interface InitResponseDto {
@@ -242,6 +257,11 @@ export interface InitResponseDto {
   /** Последние заявки по каждой квартире, ожидающие подтверждения или отклонённые. Заявки до последнего выхода из дома не возвращаются. */
   joinRequests: MyHouseJoinRequestDto[];
   user: UserProfileDto;
+}
+
+export interface UserNotificationsDto {
+  /** Уведомления о собраниях и заявках во всех домах */
+  notificationsEnabled: boolean;
 }
 
 export interface MyHousesResponseDto {
@@ -263,7 +283,8 @@ export interface FoundHouseDto {
   /** @example 6 */
   entrancesCount: number | null;
   /**
-   * Количество пользователей с подтверждённым доступом к дому
+   * Количество подтверждённых жителей дома
+   * @min 0
    * @example 286
    */
   residentsCount: number;
@@ -275,13 +296,6 @@ export interface SearchHouseResponseDto {
   membership: MyHouseMembershipDto | null;
   /** Последняя актуальная заявка текущего пользователя в этот дом либо null. Полный список доступен в /houses/me. */
   joinRequest: MyHouseJoinRequestDto | null;
-}
-
-export interface JoinHouseNotificationsDto {
-  /** @example true */
-  meetings: boolean;
-  /** @example true */
-  requests: boolean;
 }
 
 export interface JoinHouseDto {
@@ -302,7 +316,8 @@ export interface JoinHouseDto {
    */
   displayName: string;
   relationship: ApartmentRelationship;
-  notifications: JoinHouseNotificationsDto;
+  /** Если передано, обновляет уведомления во всех домах */
+  notificationsEnabled?: boolean;
 }
 
 export interface LeaveHouseDto {
@@ -315,16 +330,6 @@ export interface LeaveHouseDto {
 }
 
 export interface LeaveHouseMembershipDto {
-  /**
-   * @min 1
-   * @max 4294967295
-   * @example 1
-   */
-  houseId: number;
-}
-
-export interface UpdateHouseNotificationsDto {
-  notifications: JoinHouseNotificationsDto;
   /**
    * @min 1
    * @max 4294967295
@@ -405,7 +410,6 @@ export interface HouseEventsResponseDto {
 }
 
 export interface HouseInfoDto {
-  residentsCount: number;
   /** @example 10 */
   id: number;
   /** @example "ул. Ленина, 24" */
@@ -416,6 +420,12 @@ export interface HouseInfoDto {
   apartmentsCount: number | null;
   /** @example 6 */
   entrancesCount: number | null;
+  /**
+   * Количество подтверждённых жителей дома
+   * @min 0
+   * @example 286
+   */
+  residentsCount: number;
   /** Ссылка для связи с администратором дома. Доступна при подтверждённом членстве. */
   adminContactUrl: string | null;
   /** @example 1998 */
@@ -499,17 +509,32 @@ export interface CreateMeetingQuestionDto {
 
 export interface CreateMeetingDto {
   /**
+   * Название собрания, если вопросов несколько
    * @maxLength 255
    * @example "Установка шлагбаума во дворе"
    */
-  title: string;
+  title?: string;
+  /**
+   * Один вопрос для простого собрания, вместо questions
+   * @maxLength 2000
+   * @example "Установить шлагбаум во дворе?"
+   */
+  question?: string;
   /**
    * @maxLength 10000
    * @example "Обсудим въезд во двор и стоимость установки"
    */
   description?: string | null;
-  /** in_person: очная, absentee: заочная, mixed: очно-заочная */
-  format: MeetingFormat;
+  /**
+   * in_person: очная, absentee: заочная, mixed: очно-заочная
+   * @default "absentee"
+   */
+  format?: MeetingFormat;
+  /**
+   * all_residents: все жители, owners: только собственники
+   * @default "owners"
+   */
+  audience?: VotingAudience;
   /**
    * Место обязательно для очного и очно-заочного собрания
    * @maxLength 500
@@ -517,11 +542,11 @@ export interface CreateMeetingDto {
    */
   location?: string | null;
   /**
-   * Начало собрания с часовым поясом, дата должна быть в будущем
+   * Начало собрания, если нужно запланировать его на будущее
    * @format date-time
    * @example "2026-10-01T16:00:00.000Z"
    */
-  startsAt: string;
+  startsAt?: string;
   /**
    * Окончание собрания с часовым поясом, позже начала
    * @format date-time
@@ -529,11 +554,18 @@ export interface CreateMeetingDto {
    */
   endsAt: string;
   /**
-   * Вопросы в порядке повестки
+   * Вопросы повестки, вместо одного question
    * @maxItems 100
    * @minItems 1
    */
-  questions: CreateMeetingQuestionDto[];
+  questions?: CreateMeetingQuestionDto[];
+  /**
+   * Порог участия от числа квартир, null если не нужен
+   * @min 1
+   * @max 100
+   * @example 50
+   */
+  participationThresholdPercent?: number | null;
 }
 
 export interface MeetingParticipationResponseDto {
@@ -600,8 +632,11 @@ export interface MeetingDetailsResponseDto {
   title: string;
   /** in_person: очная, absentee: заочная, mixed: очно-заочная */
   format: MeetingFormat;
+  audience: VotingAudience;
   /** scheduled: ещё не началось, active: идёт, closed: завершено, cancelled: отменено */
   status: MeetingStatus;
+  /** Голосование закончено, результаты больше не меняются от новых голосов */
+  resultsFinal: boolean;
   /** @example "У второго подъезда" */
   location: string | null;
   /**
@@ -619,6 +654,24 @@ export interface MeetingDetailsResponseDto {
    * @example 53
    */
   participantsCount: number;
+  /**
+   * Порог участия от числа квартир, null если не задан
+   * @example 50
+   */
+  participationThresholdPercent: number | null;
+  /**
+   * Количество квартир дома, null если не указано
+   * @example 412
+   */
+  apartmentsCount: number | null;
+  /**
+   * Квартиры, от которых голосовали или отметили «Приду»
+   * @example 213
+   */
+  participatingApartmentsCount: number;
+  /** null если порог участия не задан или число квартир неизвестно */
+  participationThresholdReached: boolean | null;
+  type: "meeting";
   /** Свой ответ и число планирующих прийти, null для заочного собрания */
   participation: MeetingParticipationResponseDto | null;
   /** @example "Обсудим въезд во двор и стоимость установки" */
@@ -641,8 +694,11 @@ export interface MeetingListItemDto {
   title: string;
   /** in_person: очная, absentee: заочная, mixed: очно-заочная */
   format: MeetingFormat;
+  audience: VotingAudience;
   /** scheduled: ещё не началось, active: идёт, closed: завершено, cancelled: отменено */
   status: MeetingStatus;
+  /** Голосование закончено, результаты больше не меняются от новых голосов */
+  resultsFinal: boolean;
   /** @example "У второго подъезда" */
   location: string | null;
   /**
@@ -661,6 +717,24 @@ export interface MeetingListItemDto {
    */
   participantsCount: number;
   /**
+   * Порог участия от числа квартир, null если не задан
+   * @example 50
+   */
+  participationThresholdPercent: number | null;
+  /**
+   * Количество квартир дома, null если не указано
+   * @example 412
+   */
+  apartmentsCount: number | null;
+  /**
+   * Квартиры, от которых голосовали или отметили «Приду»
+   * @example 213
+   */
+  participatingApartmentsCount: number;
+  /** null если порог участия не задан или число квартир неизвестно */
+  participationThresholdReached: boolean | null;
+  type: "meeting";
+  /**
    * Количество вопросов
    * @example 3
    */
@@ -669,9 +743,50 @@ export interface MeetingListItemDto {
   firstQuestion: MeetingQuestionDto | null;
 }
 
+export interface PollOptionDto {
+  /** @example 1 */
+  id: number;
+  /** @example "Светло-серый" */
+  title: string;
+  /** Сколько жителей выбрали вариант */
+  votesCount: number;
+  /** Процент ответивших. При выборе нескольких вариантов сумма может быть больше 100 */
+  percent: number;
+}
+
+export interface PollDto {
+  type: "poll";
+  /** @example 1 */
+  id: number;
+  /** @example 1 */
+  houseId: number;
+  /** @example "Какой цвет покрасить стены в подъездах?" */
+  question: string;
+  audience: VotingAudience;
+  allowMultiple: boolean;
+  /** @format date-time */
+  endsAt: string;
+  /** По сроку опроса */
+  status: "active" | "closed";
+  /** Результат окончательный после срока опроса */
+  resultsFinal: boolean;
+  /** Сколько жителей ответили на опрос */
+  responsesCount: number;
+  /** Выбранные мной варианты */
+  myOptionIds: number[];
+  options: PollOptionDto[];
+}
+
 export interface MeetingsResponseDto {
-  /** Собрания текущей страницы */
-  items: MeetingListItemDto[];
+  /** Собрания и опросы текущей страницы */
+  items: (
+    | ({
+        type: "meeting";
+      } & MeetingListItemDto)
+    | ({
+        type: "poll";
+      } & PollDto)
+  )[];
   /**
    * Номер страницы
    * @example 1
@@ -683,7 +798,7 @@ export interface MeetingsResponseDto {
    */
   limit: number;
   /**
-   * Количество собраний за выбранный период
+   * Количество собраний и опросов за выбранный период
    * @example 42
    */
   total: number;
@@ -714,9 +829,9 @@ export interface MeetingVoteDto {
 
 export interface UpdateMeetingVotesDto {
   /**
-   * Ответы на вопросы без повторяющихся questionId
+   * Ответы без повторяющихся questionId. Меняются только переданные ответы, пустой массив сбрасывает все свои ответы
    * @maxItems 100
-   * @minItems 1
+   * @minItems 0
    */
   votes: MeetingVoteDto[];
 }
@@ -724,6 +839,44 @@ export interface UpdateMeetingVotesDto {
 export interface MeetingVotesResponseDto {
   /** Все свои ответы по собранию в порядке повестки */
   votes: MeetingVoteDto[];
+}
+
+export interface CreatePollOptionDto {
+  /**
+   * @maxLength 255
+   * @example "Светло-серый"
+   */
+  title: string;
+}
+
+export interface CreatePollDto {
+  /** @example "Какой цвет покрасить стены в подъездах?" */
+  question: string;
+  /**
+   * @maxItems 20
+   * @minItems 2
+   */
+  options: CreatePollOptionDto[];
+  /** @example false */
+  allowMultiple: boolean;
+  /** all_residents: все жители, owners: только собственники */
+  audience: VotingAudience;
+  /**
+   * Срок окончания с часовым поясом
+   * @format date-time
+   * @example "2026-10-07T20:59:00.000Z"
+   */
+  endsAt: string;
+}
+
+export interface UpdatePollVotesDto {
+  /**
+   * ID выбранных вариантов. Повторная отправка меняет ответ, пустой массив сбрасывает выбор
+   * @maxItems 20
+   * @minItems 0
+   * @example [1,3]
+   */
+  optionIds: number[];
 }
 
 export interface RequestAuthorDto {
@@ -1299,6 +1452,47 @@ export class Api<
     /**
      * No description
      *
+     * @tags Users
+     * @name GetMyNotifications
+     * @summary Получить настройки уведомлений
+     * @request GET:/api/users/me/notifications
+     * @secure
+     */
+    getMyNotifications: (params: RequestParams = {}) =>
+      this.request<UserNotificationsDto, ErrorResponseDto>({
+        path: `/api/users/me/notifications`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Одна настройка для всех домов
+     *
+     * @tags Users
+     * @name UpdateMyNotifications
+     * @summary Изменить уведомления
+     * @request PUT:/api/users/me/notifications
+     * @secure
+     */
+    updateMyNotifications: (
+      data: UserNotificationsDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<UserNotificationsDto, ErrorResponseDto>({
+        path: `/api/users/me/notifications`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags Houses
      * @name GetMyHouses
      * @summary Получение своих домов и заявок на присоединение
@@ -1401,29 +1595,6 @@ export class Api<
         body: data,
         secure: true,
         type: "application/json",
-        ...params,
-      }),
-
-    /**
-     * @description Настройки текущего пользователя в подтверждённом доме. Передайте оба переключателя.
-     *
-     * @tags Houses
-     * @name UpdateHouseNotifications
-     * @summary Изменение уведомлений дома
-     * @request PUT:/api/houses/notifications
-     * @secure
-     */
-    updateHouseNotifications: (
-      data: UpdateHouseNotificationsDto,
-      params: RequestParams = {},
-    ) =>
-      this.request<HouseNotificationsDto, ErrorResponseDto>({
-        path: `/api/houses/notifications`,
-        method: "PUT",
-        body: data,
-        secure: true,
-        type: "application/json",
-        format: "json",
         ...params,
       }),
 
@@ -1561,7 +1732,7 @@ export class Api<
       }),
 
     /**
-     * @description Доступно подтверждённым собственникам, организаторам, совету дома и админам. Собрание сразу появится в списке, без модерации
+     * @description Можно передать один question со сроком или полную повестку. Доступно собственникам, организаторам, совету дома и админам
      *
      * @tags Meetings
      * @name CreateMeeting
@@ -1585,11 +1756,11 @@ export class Api<
       }),
 
     /**
-     * @description Актуальные идут по дате начала от ближайших, прошедшие по дате окончания от новых. Доступно подтверждённым жителям дома
+     * @description Общий список для главной. Актуальные идут по дате начала, прошедшие по дате окончания. Доступно подтверждённым жителям дома
      *
      * @tags Meetings
      * @name GetHouseMeetings
-     * @summary Получение собраний дома
+     * @summary Собрания и опросы дома
      * @request GET:/api/houses/{houseId}/meetings
      * @secure
      */
@@ -1606,7 +1777,7 @@ export class Api<
          */
         page?: number;
         /**
-         * Количество собраний на странице
+         * Количество собраний и опросов на странице
          * @min 1
          * @max 100
          * @default 20
@@ -1649,7 +1820,7 @@ export class Api<
       }),
 
     /**
-     * @description Предварительное голосование для подтверждённых собственников. Можно ответить на один вопрос или несколько и поменять ответ до окончания. Остальные ответы сохраняются
+     * @description Кто может голосовать зависит от аудитории собрания. Пока голосование открыто, можно менять ответы или сбросить все свои ответы, передав пустой votes
      *
      * @tags Meetings
      * @name UpdateMeetingVotes
@@ -1673,19 +1844,75 @@ export class Api<
       }),
 
     /**
-     * @description Вопросы, результаты и свои голоса
+     * @description Передайте ID из списка вместе с типом: meeting_154 или poll_154
      *
      * @tags Meetings
-     * @name GetMeeting
-     * @summary Получение собрания
-     * @request GET:/api/meetings/{meetingId}
+     * @name GetMeetingItem
+     * @summary Получение собрания или опроса
+     * @request GET:/api/meetings/{itemId}
      * @secure
      */
-    getMeeting: (meetingId: number, params: RequestParams = {}) =>
-      this.request<MeetingDetailsResponseDto, ErrorResponseDto>({
-        path: `/api/meetings/${meetingId}`,
+    getMeetingItem: (itemId: string, params: RequestParams = {}) =>
+      this.request<
+        | ({
+            type: "meeting";
+          } & MeetingDetailsResponseDto)
+        | ({
+            type: "poll";
+          } & PollDto),
+        ErrorResponseDto
+      >({
+        path: `/api/meetings/${itemId}`,
         method: "GET",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Создать опрос для жителей этого дома
+     *
+     * @tags Polls
+     * @name CreatePoll
+     * @summary Создать опрос
+     * @request POST:/api/houses/{houseId}/polls
+     * @secure
+     */
+    createPoll: (
+      houseId: number,
+      data: CreatePollDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<PollDto, ErrorResponseDto>({
+        path: `/api/houses/${houseId}/polls`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: "application/json",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description До конца опроса можно поменять ответ или сбросить выбор, передав пустой optionIds
+     *
+     * @tags Polls
+     * @name UpdatePollVotes
+     * @summary Ответить на опрос
+     * @request PUT:/api/polls/{pollId}/votes
+     * @secure
+     */
+    updatePollVotes: (
+      pollId: number,
+      data: UpdatePollVotesDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<PollDto, ErrorResponseDto>({
+        path: `/api/polls/${pollId}/votes`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: "application/json",
         format: "json",
         ...params,
       }),

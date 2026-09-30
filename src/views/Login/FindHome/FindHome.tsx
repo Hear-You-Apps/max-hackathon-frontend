@@ -4,19 +4,23 @@ import { Panel, ScreenSpinner } from '@vkontakte/vkui';
 import './FindHome.css';
 import { Button, Header } from 'src/components';
 import { useState } from 'react';
-import { IconHomeOutline } from 'src/assets/icons';
+import { IconCancel, IconHomeOutline, IconInfoOutline } from 'src/assets/icons';
 import { paths } from 'src/navigation/routes.ts';
 import { useNavigate } from 'react-router-dom';
 import { api } from 'src/api/client.ts';
 import type { FoundHouseDto } from 'src/api/api.ts';
 import useSetHouseStore from 'src/storage/atoms/setHouse/setHouse.ts';
 
-export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
+export function FindHome({ id }: { id: string }) {
   const { setHouse } = useSetHouseStore();
 
   const [inputValue, setInputValue] = useState('NEV-64-A7');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    hasError: boolean;
+    message?: string;
+    type?: 'error' | 'warning' | 'info';
+  }>({ hasError: false });
   const [home, setHome] = useState<
     { address: string; text: string; data: FoundHouseDto } | undefined
   >(undefined);
@@ -24,7 +28,7 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
   const navigate = useNavigate();
 
   const find = async () => {
-    setError(null);
+    setError({ hasError: false });
     setHome(undefined);
     setLoading(true);
 
@@ -37,6 +41,11 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
         address: res.data.house.address,
         text: `УК «${res.data.house.managementCompanyName}» · ${res.data.house.apartmentsCount} квартир · ${res.data.house.residentsCount} жителей уже в приложении`,
       });
+
+      if (res.data.joinRequest) {
+        setError({ hasError: true, message: 'Вы уже в этом доме', type: 'info' });
+        return;
+      }
     } catch (error) {
       setLoading(false);
       console.error('Search house error:', error);
@@ -52,15 +61,23 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
         const apiError = error.error as { code?: string; message?: string };
 
         if (apiError.code === 'INVITATION_NOT_FOUND') {
-          setError('Дом с таким кодом приглашения не найден');
+          setError({
+            hasError: true,
+            message: 'Дом с таким кодом приглашения не найден',
+            type: 'error',
+          });
           return;
         }
 
-        setError(apiError.message ?? 'Не удалось найти дом');
+        setError({
+          hasError: true,
+          message: apiError.message ?? 'Не удалось найти дом',
+          type: 'error',
+        });
         return;
       }
 
-      setError('Не удалось выполнить поиск дома');
+      setError({ hasError: true, message: 'Не удалось выполнить поиск дома', type: 'error' });
     }
   };
 
@@ -78,7 +95,7 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
 
   return (
     <Panel id={id}>
-      <Header back={onBack}>Код дома</Header>
+      <Header isBack>Код дома</Header>
       <MaxPanel className="page-content find-home">
         {loading ? <ScreenSpinner /> : null}
 
@@ -108,7 +125,7 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
               }
 
               setInputValue(formatted);
-              setError(null);
+              setError({ hasError: false });
             }}
             placeholder="Код дома"
             maxLength={9}
@@ -122,9 +139,31 @@ export function FindHome({ id, onBack }: { id: string; onBack: () => void }) {
           Найти дом
         </Button>
 
-        {error}
+        {error.hasError ? (
+          <div
+            className={`error-card ${error.type === 'warning' ? 'warning' : ''} ${error.type === 'info' ? 'info' : ''}`}
+          >
+            <div>
+              <div className={'error-card__icon'}>
+                {error.type === 'info' ? <IconInfoOutline /> : <IconCancel />}
+              </div>
+              <div className={'error-card__text'}>
+                {error.message}
+                {error.type === 'info' ? (
+                  <span>{home?.address}. Второй раз прикрепляться не нужно</span>
+                ) : null}
+              </div>
+            </div>
 
-        {home ? (
+            {error.type === 'info' ? (
+              <Button onClick={() => set()} mode={'themed'}>
+                Открыть дом
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!error && home ? (
           <>
             <div className={'found-home'}>
               <div className={'badge'}>Дом найден</div>

@@ -4,7 +4,7 @@ export function Badge({
   mode = 'primary',
   text,
 }: {
-  mode?: 'primary' | 'neutral' | 'positive' | 'yellow';
+  mode?: 'primary' | 'neutral' | 'positive' | 'yellow' | 'negative';
   text: string;
 }) {
   return <div className={`badge ${mode}`}>{text}</div>;

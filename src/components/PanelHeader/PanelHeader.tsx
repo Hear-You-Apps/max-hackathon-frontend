@@ -1,40 +1,77 @@
 import './PanelHeader.css';
 import { PanelHeader } from '@vkontakte/vkui';
-import { IconArrowLeftOutline } from 'src/assets/icons';
+import {
+  IconArrowLeftOutline,
+  IconNotificationOutline,
+  IconNotificationsOff,
+} from 'src/assets/icons';
 import * as React from 'react';
-import { useUserStore } from 'src/storage';
+import { useSelectedHouseStore, useUserStore } from 'src/storage';
+import declOfNum from 'src/functions/declOfNum.ts';
+import { useNavigate } from 'react-router-dom';
+import { api } from 'src/api/client.ts';
 
 export function Header({
-  back,
+  isBack,
   children,
   after,
   isHome = false,
 }: {
-  back?: () => void;
+  isBack?: boolean;
   children?: React.ReactNode;
-  after?: React.ReactNode;
+  after?: React.ReactNode | 'notifications';
   isHome?: boolean;
 }) {
-  const { user } = useUserStore();
-  const home = user.houses[0];
+  const { user, setUser } = useUserStore();
+  const { house } = useSelectedHouseStore();
+  const notifications = user.user.notificationsEnabled;
+
+  const navigate = useNavigate();
+
+  const toggleNotifications = () => {
+    api.updateMyNotifications({ notificationsEnabled: !notifications }).then(() => {
+      setUser({
+        ...user,
+        user: {
+          ...user.user,
+          notificationsEnabled: !notifications,
+        },
+      });
+    });
+  };
 
   return (
     <PanelHeader
       className={'header'}
       before={
-        back ? (
-          <div className={'back-button'} onClick={back}>
+        isBack ? (
+          <div className={'back-button'} onClick={() => navigate(-1)}>
             <IconArrowLeftOutline />
           </div>
         ) : null
       }
-      after={after ? <div className={'header-after'}>{after}</div> : null}
+      after={
+        after ? (
+          after === 'notifications' ? (
+            <div style={{ padding: 8 }}>
+              {notifications ? (
+                <IconNotificationOutline onClick={toggleNotifications} />
+              ) : (
+                <IconNotificationsOff onClick={toggleNotifications} />
+              )}
+            </div>
+          ) : (
+            <div className={'header-after'}>{after}</div>
+          )
+        ) : null
+      }
     >
       {isHome ? (
         <div className={'home-header'}>
-          <div>{home.address}</div>
+          <div>{house?.address}</div>
           <div>
-            {home.apartmentsCount} квартир · {home.residentsCount ?? 0} в приложении
+            {declOfNum(house?.apartmentsCount ?? 0, ['квартира', 'квартиры', 'квартир'])} ·{' '}
+            {house?.residentsCount ?? 0} в приложении
           </div>
         </div>
       ) : (

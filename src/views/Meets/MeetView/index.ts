@@ -1,2 +1,1 @@
-export * from './Meets';
 export * from './MeetView';

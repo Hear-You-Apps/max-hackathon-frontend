@@ -8,6 +8,7 @@ export function Card({
   after,
   children,
   bottom,
+  onClick,
 }: {
   title?: string;
   subtitle?: string;
@@ -15,9 +16,10 @@ export function Card({
   badge?: React.ReactNode;
   after?: React.ReactNode;
   bottom?: React.ReactNode;
+  onClick?: () => void;
 }) {
   return (
-    <div className={'card'}>
+    <div className={'card'} onClick={onClick}>
       <div className={'card-top'}>
         <div className={'card-badge'}>{badge}</div>
         <div className={'card-after'}>{after}</div>

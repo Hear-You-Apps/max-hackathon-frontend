@@ -13,15 +13,7 @@ import useSetHouseStore from 'src/storage/atoms/setHouse/setHouse.ts';
 import { paths } from 'src/navigation/routes.ts';
 //import { paths } from 'src/navigation/routes.ts';
 
-export function SetHome({
-  id,
-  onBack,
-  requests,
-}: {
-  id: string;
-  onBack?: () => void;
-  requests?: boolean;
-}) {
+export function SetHome({ id, requests }: { id: string; requests?: boolean }) {
   const { user, setUser } = useUserStore();
   const { house } = useSetHouseStore();
 
@@ -44,7 +36,7 @@ export function SetHome({
     }
   }, [house, navigate, user.joinRequests]);
 
-  const checkRequest = useEffectEvent(async () => {
+  const checkRequest = useEffectEvent(() => {
     setLoading(true);
     if (!house) {
       setLoading(false);
@@ -52,14 +44,15 @@ export function SetHome({
     }
 
     try {
-      const res = await api.getMyHouses();
-      const joinRequests = res.data.joinRequests ?? [];
+      api.getMyHouses().then((res) => {
+        const joinRequests = res.data.joinRequests ?? [];
 
-      const hasRequestForCurrentHouse = joinRequests.some(
-        (request) => request.house.id === house.id,
-      );
+        const hasRequestForCurrentHouse = joinRequests.some(
+          (request) => request.house.id === house.id,
+        );
 
-      setHasJoinRequests(hasRequestForCurrentHouse);
+        setHasJoinRequests(hasRequestForCurrentHouse);
+      });
     } catch (error) {
       console.error(error);
     }
@@ -83,10 +76,7 @@ export function SetHome({
         apartmentNumber: flat,
         displayName: name,
         relationship: role,
-        notifications: {
-          meetings: notifications,
-          requests: notifications,
-        },
+        notificationsEnabled: notifications,
       });
       console.log(res);
 
@@ -103,7 +93,7 @@ export function SetHome({
 
   return (
     <Panel id={id}>
-      <Header back={onBack}>Ваш дом</Header>
+      <Header isBack>Ваш дом</Header>
       <MaxPanel className="page-content set-home">
         {loading ? (
           <ScreenSpinner />
@@ -121,6 +111,12 @@ export function SetHome({
             </div>
             <Button onClick={() => navigate(paths.findHome, { replace: true })}>
               Отправить ещё одну заявку
+            </Button>
+            <Button
+              mode={'themed'}
+              onClick={() => api.debugApproveJoinRequest({ requestId: user.joinRequests[0].id })}
+            >
+              debug: approve request
             </Button>
           </>
         ) : (

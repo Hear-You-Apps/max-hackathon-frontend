@@ -1,1 +1,1 @@
-export * from './setHouse.ts';
+export { default as useSetHouseStore } from './setHouse.ts';

@@ -16,8 +16,11 @@ import type { HouseChatDto, HouseContactDto } from 'src/api/api.ts';
 import { api } from 'src/api/client.ts';
 import { useCallback, useEffect } from 'react';
 import useSelectedHouseStore from 'src/storage/atoms/selectedHome/selectedHome.ts';
+import declOfNum from 'src/functions/declOfNum.ts';
+import { useUserStore } from 'src/storage';
 
 export function HomeInfo({ id }: { id: string }) {
+  const { user } = useUserStore();
   const { house, homeInfo, setHomeInfo, setChats } = useSelectedHouseStore();
 
   const getHomeInfo = useCallback(async () => {
@@ -64,6 +67,8 @@ export function HomeInfo({ id }: { id: string }) {
         return <IconLocation />;
       case 'other':
         return <span>{getInitials(contact.name)}</span>;
+      default:
+        return <span>{getInitials(contact.name)}</span>;
     }
   };
 
@@ -71,70 +76,82 @@ export function HomeInfo({ id }: { id: string }) {
     <Panel id={id}>
       <Header>Мой дом</Header>
       <MaxPanel className="page-content home">
-        {loading ? <Spinner style={{ padding: 16 }} size={'xl'} /> : null}
-
-        <div className={'home-card current-home'}>
-          <Cell
-            icon={<IconHome />}
-            label={homeInfo?.house.address ?? ''}
-            text={`УК «${homeInfo?.house.managementCompanyName}» · ${homeInfo?.house.apartmentsCount} квартир · ${homeInfo?.house.residentsCount} жителей уже в приложении`}
-            size={'l'}
-            after={<IconChevronRight />}
-          />
-        </div>
-
-        {homeInfo?.contacts && homeInfo?.contacts.length > 0 ? (
-          <div>
-            <div className={'home-info-header'}>контакты</div>
-            {homeInfo?.contacts.map((contact: HouseContactDto) => (
+        {loading ? (
+          <Spinner style={{ padding: 16 }} size={'xl'} />
+        ) : (
+          <>
+            <div className={'home-card current-home'}>
               <Cell
-                icon={getContactIcon(contact)}
-                label={contact.name}
-                text={`${contact.phone} · ${contact.workingHours}`}
+                icon={<IconHome />}
+                label={homeInfo?.house.address ?? ''}
+                text={`УК «${homeInfo?.house.managementCompanyName}» · ${declOfNum(homeInfo?.house.apartmentsCount ?? 0, ['квартира', 'квартиры', 'квартир'])} · ${declOfNum(homeInfo?.house.residentsCount ?? 0, ['житель', 'жителя', 'жителей'])} уже в приложении`}
+                size={'l'}
+                /*after={<IconChevronRight />}*/
+              />
+            </div>
+
+            {homeInfo?.contacts && homeInfo?.contacts.length > 0 ? (
+              <div>
+                <div className={'home-info-header'}>контакты</div>
+                {homeInfo?.contacts.map((contact: HouseContactDto) => (
+                  <Cell
+                    href={'tel:' + contact.phone}
+                    icon={getContactIcon(contact)}
+                    label={contact.name}
+                    text={`${contact.phone} · ${contact.workingHours}`}
+                    after={<IconChevronRight />}
+                  />
+                ))}
+              </div>
+            ) : null}
+
+            <div>
+              <div className={'home-info-header'}>чаты</div>
+              <Cell
+                icon={<Icon24Chats />}
+                label={'Чаты'}
+                text={''}
+                size={'l'}
                 after={<IconChevronRight />}
               />
-            ))}
-          </div>
-        ) : null}
-
-        <div>
-          <div className={'home-info-header'}>чаты</div>
-          <Cell
-            icon={<Icon24Chats />}
-            label={'Чаты'}
-            text={''}
-            size={'l'}
-            after={<IconChevronRight />}
-          />
-        </div>
-
-        <div>
-          <div className={'home-info-header'}>коммунальные платежи</div>
-          <div className={'public-service'}>
-            <div className={'public-service__text'}>
-              <span>6 842 ₽</span>
-              <span>за август · оплатить до 25 сентября</span>
             </div>
-            <Button className={'public-service-button'}>Оплатить</Button>
-          </div>
-          <div className={'public-service__bottom'}>История платежей и квитанции</div>
-        </div>
 
-        {homeInfo?.upcomingEvents && homeInfo?.upcomingEvents.length > 0 ? (
-          <div>
-            <div className={'home-info-header'}>ближашее</div>
+            <div>
+              <div className={'home-info-header'}>коммунальные платежи</div>
+              <div className={'public-service'}>
+                <div className={'public-service__text'}>
+                  <span>6 842 ₽</span>
+                  <span>за август · оплатить до 25 сентября</span>
+                </div>
+                <Button className={'public-service-button'}>Оплатить</Button>
+              </div>
+              <div className={'public-service__bottom'}>История платежей и квитанции</div>
+            </div>
 
-            {homeInfo.upcomingEvents.map((el) => {
-              return (
-                <Cell
-                  icon={<IconInfo className={el.type === 'water_outage' ? 'warning' : ''} />}
-                  label={el.title}
-                  text={`${formatDate(el.startsAt)} · ${el.description}`}
-                />
-              );
-            })}
-          </div>
-        ) : null}
+            {homeInfo?.upcomingEvents && homeInfo?.upcomingEvents.length > 0 ? (
+              <div>
+                <div className={'home-info-header'}>ближашее</div>
+
+                {homeInfo.upcomingEvents.map((el) => {
+                  return (
+                    <Cell
+                      icon={<IconInfo className={el.type === 'water_outage' ? 'warning' : ''} />}
+                      label={el.title}
+                      text={`${formatDate(el.startsAt)} · ${el.description}`}
+                    />
+                  );
+                })}
+              </div>
+            ) : null}
+
+            <div>
+              <div className={'home-info-header'}>debug</div>
+              <Button onClick={() => api.debugDeleteUser({ userId: user.user.id })}>
+                delete user
+              </Button>
+            </div>
+          </>
+        )}
       </MaxPanel>
     </Panel>
   );

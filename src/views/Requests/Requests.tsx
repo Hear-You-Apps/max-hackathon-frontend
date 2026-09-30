@@ -1,10 +1,11 @@
 import { Panel as MaxPanel } from '@maxhub/max-ui';
-import { Panel, PanelHeader } from '@vkontakte/vkui';
+import { Panel } from '@vkontakte/vkui';
+import { Header } from 'src/components';
 export function Requests({ id }: { id: string }) {
   return (
     <Panel id={id}>
-      <PanelHeader>Профиль</PanelHeader>
-      <MaxPanel className="page-content"></MaxPanel>
+      <Header isHome />
+      <MaxPanel className="page-content">В РАЗРАБОТКЕ</MaxPanel>
     </Panel>
   );
 }

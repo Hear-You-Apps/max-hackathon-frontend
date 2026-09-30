@@ -3,6 +3,8 @@
   align-items: center;
   justify-content: center;
 
+  width: fit-content;
+
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
@@ -30,4 +32,9 @@
 .badge.yellow {
   background: rgba(255, 159, 10, 0.14);
   color: rgba(255, 159, 10, 1);
+}
+
+.badge.negative {
+  background: rgba(255, 48, 60, 0.12);
+  color: rgba(255, 48, 60, 1);
 }

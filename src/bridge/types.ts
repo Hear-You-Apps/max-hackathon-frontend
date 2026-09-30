@@ -9,6 +9,7 @@ export interface MaxBridge {
     onClick(callback: () => void): void;
     offClick(callback: () => void): void;
   };
+  shareContent: ({ link }: { link: string }) => void;
 }
 
 declare global {
